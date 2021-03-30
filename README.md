@@ -1,5 +1,7 @@
 User-interactive JavaScript web app of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
 
+Play with the web app at https://gol-webapp.jamaisvu.repl.co/.
+
 ## Instructions
 
 Use the `Previous Step` and `Next Step` buttons, or left and right arrow keys, to move the grid state backward and forward.<br>
