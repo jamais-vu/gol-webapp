@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Conway's Game of Life</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+
+  <body>
+    <div class="toolbar">
+      <div id="headingContainer">
+        <h1>Conway's Game of Life</h1>
+        <span id="windowSizeAlert">
+          <!--
+            Intentionally blank. The JS script will add text here if the window
+            size is below a certain width or height.
+           -->
+        </span>
+      </div>
+
+      <!-- Buttons for changing the pattern displayed on the canvas. -->
+      <div id="patternButtonsContainer">
+        <button id="clearCanvasButton">Clear</button>
+        <button id="resetPatternButton">Reset Pattern</button>
+        <button id="setAsStartPatternButton">Set as Start Pattern</button>
+        <button id="randomizeButton">Randomize</button>
+
+        <span id="selectPatternDropdownContainer">
+          <form name="selectPatternForm">
+            <label for="selectPattern">
+              Select Pattern:
+            </label>
+            <select id="selectPattern">
+              <!-- This is populated by script at runtime. -->
+            </select>
+            <input type="button" value="Change" id="changePatternButton">
+          </form>
+        </span>
+      </div>
+
+      <!-- Buttons for transitioning the grid forward/backward. -->
+      <div id="stepButtonsContainer">
+        <button id="previousStepButton">Previous Step</button>
+        <button id="pauseButton">Play</button>
+        <button id="nextStepButton">Next Step</button>
+
+        <span id="stepInputFormContainer">
+          <form name="stepInputForm">
+            <label for="stepInput">Go to step:</label>
+            <input type="number" id="stepInput" name="stepInput" min="0" max="9999">
+            <input type="button" id="stepInputSubmit" value="Go to">
+          </form>
+        </span>
+      </div>
+
+      <!-- Slider for controlling the time between grid steps. -->
+      <div id="stepDelaySliderContainer">
+        <label for="stepDelaySlider">Speed:</label>
+        <input id="stepDelaySlider" type="range" min="0" max="1000" step="50">
+        <span id="stepDelaySliderText"></span>
+      </div>
+
+      <!-- Displays current step. Modified by script. -->
+      <div id="stepCountContainer">
+        <span id="stepCountLabel">Steps:</span>
+        <span id="stepCountText">0</span>
+      </div>
+
+      <!-- Checkbox to show/hide debug info. Handled by jquery script. -->
+      <label for="debugCheckbox">Show debug info</label>
+      <input type="checkbox" id="debugCheckbox" value="Debug info" checked="true">
+
+      <!-- Information used for debugging. -->
+      <table id="debugInfoTable">
+        <tr>
+          <th colspan="2" align="left">Mouse Position</th>
+          <th colspan="2" align="left">Canvas Size</th>
+          <th colspan="2" align="left">Cells</th>
+          <th colspan="2" align="left">Window</th>
+        </tr>
+        <tr>
+          <!-- Displays mouse position relative to canvas. Modified by script. -->
+          <td id="canvasMouseCoordsLabel", , class="debugLabel">x, y:</td>
+          <td id="canvasMouseCoords", class="debugNumber"></td>
+          <!-- Displays dimensions of canvas. -->
+          <td id="canvasDimensionsLabel", class="debugLabel">xMax, yMax:</td>
+          <td id="canvasDimensions", class="debugNumber"></td>
+          <!-- Displays cell size, in pixels. -->
+          <td id="cellSizeLabel", class="debugLabel">Size:</td>
+          <td id="cellSize", class="debugNumber"></td>
+          <!-- Displays absolute mouse position in window. Modified by script. -->
+          <td id="windowMouseCoordsLabel", class="debugLabel">x, y:</td>
+          <td id="windowMouseCoords", class="debugNumber"></td>
+        </tr>
+        <tr>
+          <!-- Displays row and column of cell at mouse. Modified by script. -->
+          <td id="canvasMouseCellLabel", , class="debugLabel">i, j:</td>
+          <td id="canvasMouseCell", class="debugNumber"></td>
+          <!-- Displays total rows and columns in the grid. -->
+          <td id="gridDimensionsLabel", class="debugLabel">rows, columns:</td>
+          <td id="gridDimensions", class="debugNumber"></td>
+          <!-- Displays total count of cells in the grid. -->
+          <td id="cellCountLabel", class="debugLabel">Count:</td>
+          <td id="cellCount", class="debugNumber"></td>
+          <!-- Displays dimensions of window. -->
+          <td id="windowDimensionsLabel", class="debugLabel">Size x, y:</td>
+          <td id="windowDimensions", class="debugNumber"></td>
+        </tr>
+      </table>
+
+    </div>
+
+    <!-- The canvas we draw our grid on. -->
+    <canvas class="myCanvas">
+      <p>If you see this then the canvas didn't render.</p>
+    </canvas>
+
+    <script type="module" src="js/main.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript">
+      // Show or hide the debug info table based on whether checkbox is checked.
+      $('#debugCheckbox').change( function() {
+        if (this.checked) {
+          $('#debugInfoTable').show();
+        } else {
+          $('#debugInfoTable').hide();
+        }
+      });
+
+      // Disable pressing "Enter" key on step input, since that causes page to
+      // reload. User should press the "Go to" button.
+      // TODO: In the future we'll use jQuery so pressing "Enter" here triggers
+      // the grid transition and draws the user-inputted step on canvas.
+      $('#stepInput').keypress( function(event) {
+        if (event.which == '13') {
+          event.preventDefault();
+        }
+      });
+    </script>
+
+  </body>
+</html>
