@@ -1,6 +1,5 @@
 /* jshint esversion: 6 */
 
-import * as Life from './life.js';
 import * as Patterns from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 
