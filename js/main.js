@@ -2,7 +2,7 @@
 
 import * as Life from './life.js';
 import * as Patterns from './patterns.js';
-import { PaddedGameOfLifeGrid, ToroidalGameOfLifeGrid } from './class.js';
+import { ToroidalGameOfLifeGrid } from './class.js';
 
 // Set up canvas
 const canvas = document.querySelector('.myCanvas');
@@ -16,17 +16,6 @@ const height = canvas.height = (window.innerHeight * 0.95); // viewport height
 const cellSize = 10;
 const rows = Math.floor(height / cellSize);
 const columns = Math.floor(width / cellSize);
-
-// Set up grid.
-
-/* Set up padded grid.
- * `padding` is the number of cells to add offscreen in each direction,
- * to simulate infinite grid.
- * If this causes performance problems, it may be lowered to 1 or 2, but the
- * greater it is, the better that simulates an infinite grid's behavior.
- */
-// const padding = 5;
-// let grid = new PaddedGameOfLifeGrid(rows, columns, padding);
 
 /* Set up toroidal grid.
  * This treats the 2d grid as the surface of a 3d torus, making the grid
