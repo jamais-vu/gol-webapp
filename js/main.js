@@ -97,6 +97,15 @@ clearCanvasButton.addEventListener('click', pause);
 changePatternButton.addEventListener('click', changePatternFromDropdown);
 changePatternButton.addEventListener('click', pause);
 
+/* Shows/hide debug info table depending on whether box is checked. */
+debugCheckbox.addEventListener('change', function() {
+  if (this.checked) {
+    document.getElementById('debugInfoTable').style.display = 'table';
+  } else {
+    document.getElementById('debugInfoTable').style.display = 'none';
+  }
+});
+
 /* Sets up arrow keys to control grid transition, space key to pause/unpause. */
 document.addEventListener('keydown', keydownHandler);
 
