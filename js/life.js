@@ -11,7 +11,7 @@
  */
 
 /* Returns the next state of the given grid. Assumes the grid is a torus. */
-function transitionTorusGrid(grid) {
+export function transitionTorusGrid(grid) {
   const rows = grid.length;
   const cols = grid[0].length;
 
@@ -370,9 +370,3 @@ function getNeighborCoordsRightCol(i, jMax) {
     [i + 1, jMax]
   ];
 }
-
-// Export the transitionGrid function
-export {
-  transitionGrid,
-  transitionTorusGrid,
-};
