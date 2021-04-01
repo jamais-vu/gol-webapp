@@ -7,31 +7,37 @@ import { ToroidalGameOfLifeGrid } from './class.js';
 const canvas = document.querySelector('.myCanvas');
 const ctx = canvas.getContext('2d'); // specifies canvas is 2d
 
-// These are scaled to ensure the full grid fits on the page.
+/* We set the canvas size to be slightly less than the viewport size, since
+ * we don't want to user to have to scroll horizontally to see the full grid. */
 const width = canvas.width = (window.innerWidth * 0.95); // viewport width
 const height = canvas.height = (window.innerHeight * 0.95); // viewport height
 
-// Use the full canvas to draw the grid.
-const cellSize = 10;
+/* Using a preset cell size, we calculate the maximum number of rows and columns
+ * that will fit in the canvas. */
+const cellSize = 10; // Square side length, in pixels.
 const rows = Math.floor(height / cellSize);
 const columns = Math.floor(width / cellSize);
 
-/* Set up toroidal grid.
+/* Create a new toroidal grid, with the given number of rows and columns.
  * This treats the 2d grid as the surface of a 3d torus, making the grid
  * effectively endless by having the edges of the 2d grid connect to their
- * opposite edges.
- */
+ * opposite edges. */
 let grid = new ToroidalGameOfLifeGrid(rows, columns);
 
-// Calculate grid dimensions as xy coordinates.
-// Note: These will be slightly less than, or equal to, the width and height of
-// the canvas, since depending on the cellSize there may be "leftover" pixels
-// we don't use because they're less than the size of a full cell.
+/* Calculate grid dimensions as xy coordinates.
+ * Note: These will be slightly less than, or equal to, the width and height of
+ * the canvas, since depending on the cellSize there may be "leftover" pixels
+ * we don't use because they're less than the size of a full cell. */
 const xMax = (columns * cellSize);
 const yMax = (rows * cellSize);
 
-// Modify HTML elements to show the dimensions of the canvas, and the size and
-// count of cells.
+/* Now that we've set the size of the canvas, grid, and cells, we modify the
+ * of some HTML elements in our debug table, to show the dimensions of the
+ * grid and canvas, and the size and count of cells.
+ *
+ * This does not affect the state or functionality of the grid or canvas. These
+ * are only for displaying information.
+ */
 document.getElementById('canvasDimensions').innerHTML = `${xMax}, ${yMax}`;
 document.getElementById('gridDimensions').innerHTML = `${rows}, ${columns}`;
 document.getElementById('cellSize').innerHTML = `${cellSize}x${cellSize} px`;
@@ -83,7 +89,6 @@ canvas.addEventListener('mouseout', () => {
 canvas.addEventListener('contextmenu', function(event) {
   event.preventDefault();
 });
-
 
 /* Clears the canvas. Sets all cells to 0, clears history, resets step count. */
 clearCanvasButton.addEventListener('click', () => {
@@ -217,7 +222,8 @@ function pauseButtonHandler() {
   }
 }
 
-/*
+/* Handles grid transitions (and drawing new state) based on key presses.
+ *
  * If the key pressed was the left or right arrow, repeatedly calls previous or
  * next step, respectively, for as long as the key is down.
  * If the key pressed was the space button, either pauses or unpauses the grid.
@@ -399,8 +405,7 @@ function populateSelectPattern() {
 
 // Functions for drawing on the canvas.
 
-/*
- * Animation frame loop for drawing the grid.
+/* Animation frame loop for drawing the grid.
  *
  * If paused: does nothing
  * If not paused: draws the grid, then transitions forward one step
@@ -453,8 +458,7 @@ function drawPreviousGrid() {
   }
 }
 
-/*
- * Draws the next grid and step count. Does NOT modify the grid or step count.
+/* Draws the next grid and step count. Does NOT modify the grid or step count.
  * Only draws cells whose states have changed from the previous step.
  */
 function drawNextGrid() {
@@ -515,9 +519,13 @@ function initialCanvasDraw() {
   drawGrid();
 }
 
-/* Wrapper object for a map of ij coords (as strings 'i,j') to cell state. */
+/* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
+ *
+ * This object is used in `holdDraw()`, to store which cells of the grid the
+ * mouse has already "visited" while the mouse button is held down.
+ */
 let cellMap = {
-  cells: new Map(),
+  cells: new Map(), // Map of string `${i},${j}` to state of cell at coord i,j
 
   set(i, j, state) { // Record the state of the cell at i,j
     this.cells.set(`${i},${j}`, state);
@@ -587,4 +595,4 @@ function holdDraw(event) {
   repeat(); // Call repeat() for the first time, to begin the loop.
 }
 
-loopGrid();
+loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
