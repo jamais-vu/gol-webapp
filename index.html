@@ -126,16 +126,6 @@
           $('#debugInfoTable').hide();
         }
       });
-
-      // Disable pressing "Enter" key on step input, since that causes page to
-      // reload. User should press the "Go to" button.
-      // TODO: In the future we'll use jQuery so pressing "Enter" here triggers
-      // the grid transition and draws the user-inputted step on canvas.
-      $('#stepInput').keypress( function(event) {
-        if (event.which == '13') {
-          event.preventDefault();
-        }
-      });
     </script>
 
   </body>

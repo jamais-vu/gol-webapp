@@ -150,6 +150,12 @@ stepDelaySlider.addEventListener('input', changeDelayBetweenSteps);
 /* Transitions the grid forward/backward to user-inputted step. */
 stepInputSubmit.addEventListener('click', stepInputHandler);
 stepInputSubmit.addEventListener('click', pause);
+/* Disable pressing "Enter" key on step input, since that causes page reload. */
+stepInput.addEventListener('keydown', (event) => {
+  if (event.code === 'Enter') {
+    event.preventDefault();
+  }
+});
 
 /* Displays the xy position of the mouse in the window. */
 window.addEventListener('mousemove', updateWindowMouseCoords);
