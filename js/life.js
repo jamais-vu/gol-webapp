@@ -1,9 +1,14 @@
 /* jshint esversion: 6 */
 
-// Functions for transitioning all cells in a grid to their next states.
-//
-// This only contains the transition logic.
-// Grid manipulations such as copying, resizing, etc. are in `grid.js`.
+/* This file contains the actual Game of Life rules, implemented as functions
+ * which take an Array<Array<number>> representing the cell states.
+ *
+ * Each inner array represents a row in the grid, and the numbers in each inner
+ * array represents the state of that cell (e.g., grid[i][j] corresponds to the
+ * state of the cell in row i, column j).
+ *
+ * Grid manipulations such as copying, resizing, etc. are in `grid.js`.
+ */
 
 /* Returns the next state of the given grid. Assumes the grid is a torus. */
 function transitionTorusGrid(grid) {
@@ -33,6 +38,10 @@ function transitionTorusGrid(grid) {
  * Unlike our 2d plane grid below, we need only one neighbor function for this,
  * since being on a torus means handling the "edges" is a matter of taking the
  * modulus of neighbor coords which would otherwise be "off" the 2d grid.
+ *
+ * If we really wanted to optimize this, we might check if the given ij-coord
+ * is on the edge of the grid, and only then apply `mod()`. But the application
+ * is fast enough that we need not complicate things.
  */
 function getNeighborCoordsTorus(i, j, rows, cols) {
   return [
@@ -53,12 +62,49 @@ function getNeighborCoordsTorus(i, j, rows, cols) {
 /* Returns the integer b, 0 <= b < n, such that b is congruent to a mod n.
  *
  * We don't use `a % n` because that gives remainder, not congruence.
- * For example, `mod(-1, 5)` returns `4`, whereas `-1 % 5` returns `-1`.
+ * For example, `-1 % 5` returns `-1`, whereas `mod(-1, 5)` returns `4`.
  */
 function mod(a, n) {
   return (((a % n) + n) % n);
 }
 
+/* Returns 1 (alive) or 0 (dead) based on the cell's current state and the
+ * number of live neighbors it has.
+ */
+function transitionRule(cellState, countOfLiveNeighbors) {
+  if (cellState == 1 && (countOfLiveNeighbors == 2 || countOfLiveNeighbors == 3)) {
+    // If a live cell has 2 or 3 live neighbors, it stays alive.
+    return 1;
+  } else if (cellState == 0 && countOfLiveNeighbors == 3) {
+    // If a dead cell has 3 live neighbors, it becomes alive.
+    return 1;
+  } else {
+    // Otherwise, the cell dies.
+    return 0;
+  }
+}
+
+/* Returns the number of live cells in a given array of coordinates.
+ *
+ * This is used to count the number of live neighbors for a cell, but it can
+ * count the number of live cells for any arbitrary array of cell coordinates
+ * in a given grid.
+ */
+function countLiveCells(coords, grid) {
+  let sum = 0;
+  for (let coord of coords) { // `for..of` loop is much faster than `reduce()`
+    sum += grid[coord[0]][coord[1]];
+  }
+  return sum;
+}
+
+
+// NOTE: THE FOLLOWING FUNCTIONS ARE NO LONGER USED.
+//
+// Initially we modeled the Game of Life grid as a finite 2d-plane, and had
+// several neighbor coordinate functions specially-optimized for speed when
+// calculating the next states. Since we've switched to using a toroidal grid,
+// these are no longer used, but have been kept for historical interest.
 
 /* Returns the next state of the given grid. */
 function transitionGrid(grid) {
@@ -132,44 +178,21 @@ function createLastRow(grid, iMax, jMax) {
   return lastRow;
 }
 
-/*
- * Returns 1 (alive) or 0 (dead) based on the cell's current state and the
- * number of live neighbors it has.
- */
-function transitionRule(cellState, countOfLiveNeighbors) {
-  if (cellState == 1 && (countOfLiveNeighbors == 2 || countOfLiveNeighbors == 3)) {
-    // If a live cell has 2 or 3 live neighbors, it stays alive.
-    return 1;
-  } else if (cellState == 0 && countOfLiveNeighbors == 3) {
-    // If a dead cell has 3 live neighbors, it becomes alive.
-    return 1;
-  } else {
-    // Otherwise, the cell dies.
-    return 0;
-  }
-}
-
-/*
- * Returns the number of live cells in a given array of coordinates.
- *
- * This is used to count the number of live neighbors for a cell, but it can
- * count the number of live cells for any arbitrary array of cell coordinates
- * in a given grid.
- */
-function countLiveCells(coords, grid) {
-  let sum = 0;
-  for (let coord of coords) { // `for..of` loop is much faster than `reduce()`
-    sum += grid[coord[0]][coord[1]];
-  }
-  return sum;
-}
-
-
 /* Why so many neighbor functions?
  *
  * The following functions are for getting cells adjacent to a given ij-coord.
  * A cell adjacent to (i, j) is called its "neighbor".
  *
+ * We split the logic for calculating neighbor coords into different functions
+ * for each case, which allows us to hardcode the relative neighbor coords.
+ * This is an enormous performance increase over naively calculating all
+ * neighbors and then filtering based on the cell's position.
+ *
+ * Previously, we used two for loops to generate all adjacent ij coordinates,
+ * and then filtered those for valid coordinates, but it was unacceptably slow
+ * for a user-interactive app. I wanted it to be fast.
+ *
+ * CASES:
  * The most common case is where a cell ij has neighbors in every direction, but
  * since the grid has edges, we need to account for the case where a cell ij is
  * in the first or last row or column. In those cases, we must not include
@@ -182,10 +205,6 @@ function countLiveCells(coords, grid) {
  * - Cell is in the left or right column.
  * - Cell is in both the top/bottom row and the left/right column.
  *
- * We split the logic for calculating neighbor coords into different functions
- * for each case, which allows us to hardcode the relative neighbor coords.
- * This is an enormous performance increase over naively calculating all
- * neighbors and then filtering based on the cell's position.
  *
  * For clarity, each function doc has a diagram showing the cell and neighbors.
  */
