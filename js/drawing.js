@@ -120,4 +120,29 @@ export class Drawing {
     this.ctx.fillStyle = 'red';
     this.drawGrid();
   }
+
+  /* Animation frame loop for drawing the grid.
+   *
+   * If paused: does nothing
+   * If not paused: draws the grid, then transitions forward one step
+   *
+   * and in either case, ends by calling itself again with the given delay.
+   *
+   * Note: In the case where isPaused === false, this mutates the `grid` object.
+   */
+  loopGrid() {
+    if (this.isPaused) {
+      // We don't do anything if it's paused, just call again
+      setTimeout(() => {
+        requestAnimationFrame(this.loopGrid.bind(this));
+      }, this.delay);
+    } else {
+      // If it's playing, then we move forward 1 step, then call again
+      this.grid.nextStep(); // Note: This mutates `grid` object by moving it forward 1 step.
+      this.drawNextGrid();
+      setTimeout(() => {
+        requestAnimationFrame(this.loopGrid.bind(this));
+      }, this.delay );
+    }
+  }
 }

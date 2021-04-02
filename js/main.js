@@ -397,34 +397,13 @@ function inGridBoundaries(xPos, yPos) {
 }
 
 
-/* Drawing logic which mutates `grid` (pure drawing logic is in 'drawing.js').
+/* Drawing logic
  *
- * `loopGrid()` mutates `grid` if `isPaused === false`.
  * `holdDraw` mutates `grid`.
  *
  * TODO: I want to also put these in the `Drawing` class eventually.
  */
 
-/* Animation frame loop for drawing the grid.
- *
- * If paused: does nothing
- * If not paused: draws the grid, then transitions forward one step
- *
- * and in either case, ends by calling itself again with the given delay.
- *
- * Note: In the case where isPaused === false, this mutates the `grid` object.
- */
-function loopGrid() {
-  if (drawing.isPaused) {
-    // We don't do anything if it's paused, just call again
-    setTimeout(() => requestAnimationFrame(loopGrid), drawing.delay);
-  } else {
-    // If it's playing, then we move forward 1 step, then call again
-    nextStep(); // Note: This mutates `grid` object by moving it forward 1 step.
-    drawing.drawNextGrid();
-    setTimeout(() => requestAnimationFrame(loopGrid), drawing.delay);
-  }
-}
 
 /* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
  *
@@ -504,4 +483,4 @@ function holdDraw(event) {
   repeat(); // Call repeat() for the first time, to begin the loop.
 }
 
-loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
+drawing.loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
