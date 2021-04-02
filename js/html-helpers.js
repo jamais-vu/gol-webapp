@@ -8,16 +8,22 @@ import { presetPatterns } from './patterns.js';
  * canvas, and for update those values as they change.
  */
 
-// TODO: We're leaving this here because eventually I want a `Drawing` class
-// which contains all the variables related to drawing, in which case we could
-// import only this function, and pass it a `Drawing` instance, and then it
-// gets all the arguments for the other functions.
-/* Sets initial values of HTML elements on page load. */
-function initializeHTMLElements() { // TODO: add export when this is working
-  updateStepDelaySliderText(delay); // Show initial delay between grid steps.
-  populateSelectPattern();     // Populate preset patterns dropdown menu.
-  populateDebugInfoTable(xMax, yMax, rows, columns, cellSize);
-  windowSizeCheck(width, height); // Check whether user's browser is a good size
+/* Sets initial values of HTML elements on page load.
+ *
+ * In practice, we pass this an instance of the `Drawing` class, but any object
+ * with the specified properties will work.
+ */
+export function initializeHTMLElements(initialValues) {
+  updateStepDelaySliderText(initialValues.delay);
+  populateSelectPattern();
+  populateDebugInfoTable(
+    initialValues.xMax,
+    initialValues.yMax,
+    initialValues.grid.rowCount,
+    initialValues.grid.colCount,
+    initialValues.cellSize
+  );
+  windowSizeCheck(initialValues.xMax, initialValues.yMax);
 }
 
 /* Populates child elements of the `debugInfoTable` element
@@ -25,7 +31,7 @@ function initializeHTMLElements() { // TODO: add export when this is working
  * Unlike the mouse position, which is updated upon mouse move, the values here
  * are determined when the page is first loaded, and do not change thereafter.
  */
-export function populateDebugInfoTable(xMax, yMax, rows, columns, cellSize) {
+function populateDebugInfoTable(xMax, yMax, rows, columns, cellSize) {
   // xy-coordinates, in pixels, of the bottom-right.
   document.getElementById('canvasDimensions').innerHTML = `${xMax}, ${yMax}`;
   // Count of rows and columns in the grid.
@@ -40,7 +46,7 @@ export function populateDebugInfoTable(xMax, yMax, rows, columns, cellSize) {
 }
 
 /* Populates dropdown menu with preset patterns. */
-export function populateSelectPattern() {
+function populateSelectPattern() {
   let selectPattern = document.getElementById("selectPattern");
 
   const patternNames = Object.keys(presetPatterns);
@@ -49,7 +55,7 @@ export function populateSelectPattern() {
   }
 }
 
-// TODO
+// TODO: ij coords broken since we moved this into its own file.
 /* Shows the xy and ij position of the mouse as it moves on the canvas.
  *
  * This information is displayed in the `debugInfoTable` element.
@@ -82,7 +88,7 @@ export function updateWindowMouseCoords(event) {
 }
 
 /* If the window is not wide or tall enough, suggest the user resize it. */
-export function windowSizeCheck(width, height) {
+function windowSizeCheck(width, height) {
 if (width < 700 || height < 600) {
   document.getElementById('windowSizeAlert')
     .innerHTML = '(Best viewed in a larger window! <a href="">Reload</a>' +

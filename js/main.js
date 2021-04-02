@@ -2,16 +2,18 @@
 
 import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
+
 import {
-  populateDebugInfoTable,
-  populateSelectPattern,
+  initializeHTMLElements,
   updateCanvasMouseCoords,
   updateStepCountText,
   updateStepDelaySliderText,
   updateWindowMouseCoords,
-  windowSizeCheck,
 } from './html-helpers.js';
 
+import { Drawing } from './drawing.js';
+
+// TODO: Update this module comment as we make changes.
 /* This file contains logic for drawing the grid on canvas, and for handling
  * user interactions via button or mouse press.
  *
@@ -47,23 +49,13 @@ let grid = new ToroidalGameOfLifeGrid(rows, columns);
 const xMax = (columns * cellSize);
 const yMax = (rows * cellSize);
 
+/* Create a new Drawing object with everything we just set up.
+ * This object handles everything we do with the canvas. */
+let drawing = new Drawing(ctx, grid, cellSize, xMax, yMax);
 
-/* Initialize variables used to control drawing and user interactions.
- *
- * TODO: I dislike using top-level variables here. In the future, we should
- * encapsulate all the stuff related to drawing in its own class or module. */
-let delay = 500;             // Intial time (ms) between each loopGrid() call.
-let isPaused = true;         // Drawing starts paused.
-let isMouseDown = false;     // Whether the mouse is down on the canvas.
-let mouseDownButton;         // Set 0 if mousedown is left-click, 2 for right.
-
-/* Initalize HTML elements and draw gridlines and cells on canvas. */
-updateStepDelaySliderText(delay); // Show initial delay between grid steps.
-populateSelectPattern();          // Populate preset patterns dropdown menu.
-populateDebugInfoTable(xMax, yMax, rows, columns, cellSize);
-windowSizeCheck(xMax, yMax);   // Check whether user's browser is a good size
-
-initialCanvasDraw(); // Start by drawing the grid for step 0.
+/* Initalize HTML elements, then draw gridlines and initial cell states. */
+initializeHTMLElements(drawing);
+drawing.initialCanvasDraw();
 
 
 /* UI logic
@@ -88,19 +80,19 @@ canvas.addEventListener('mousemove', updateCanvasMouseCoords);
 canvas.addEventListener('mousedown', canvasMouseDownHandler);
 /* While the mouse is held down, any cell under it is set to alive. */
 canvas.addEventListener('mousemove', (event) => {
-  if (isMouseDown) {
+  if (drawing.isMouseDown) {
     holdDraw(event);
   }
 });
 /* Sets isMouseDown to false, which stops click-and-hold drawing of cells. */
 canvas.addEventListener('mouseup', () => {
-  isMouseDown = false;
+  drawing.isMouseDown = false;
   cellMap.clear(); // We empty the map of visited cells when mouse is lifted.
 });
 /* Sets isMouseDown to false if the mouse moves out of the canvas, regardless of
    whether the mouse is still held down. */
 canvas.addEventListener('mouseout', () => {
-  isMouseDown = false;
+  drawing.isMouseDown = false;
   cellMap.clear();
 });
 /* Prevent right-click on canvas from opening the context menu. */
@@ -111,7 +103,7 @@ canvas.addEventListener('contextmenu', function(event) {
 /* Clears the canvas. Sets all cells to 0, clears history, resets step count. */
 clearCanvasButton.addEventListener('click', () => {
   grid.clear();
-  drawGrid();
+  drawing.drawGrid();
 });
 clearCanvasButton.addEventListener('click', pause);
 
@@ -141,7 +133,7 @@ nextStepButton.addEventListener('mousedown', clickAndHoldNextStepButton);
 /* Replaces the current grid with a randomly-populated grid. */
 randomizeButton.addEventListener('click', () => {
   grid.randomize();
-  drawGrid();
+  drawing.drawGrid();
 });
 randomizeButton.addEventListener('click', pause);
 
@@ -154,14 +146,14 @@ randomizeButton.addEventListener('click', pause);
  */
 resetPatternButton.addEventListener('click', () => {
   grid.reset();
-  drawGrid();
+  drawing.drawGrid();
 });
 resetPatternButton.addEventListener('click', pause);
 
 /* Sets current grid as start grid, then clears history and step count. */
 setAsStartPatternButton.addEventListener('click', () => {
   grid.setAsStart();
-  drawGrid();
+ drawing.drawGrid();
 });
 
 /* Changes the delay between drawing frames. */
@@ -191,7 +183,7 @@ window.addEventListener('mousemove', updateWindowMouseCoords);
 /* Gets xy position of mouse, and if it's over the grid, modifies cells. */
 function canvasMouseDownHandler(event) {
   // Store which mouse button was pressed, for use in holdDraw()
-  mouseDownButton = event.button;
+  drawing.mouseDownButton = event.button;
 
   // xy-coordinate of mouse press, relative to canvas origin.
   const xPos = event.offsetX;
@@ -204,16 +196,16 @@ function canvasMouseDownHandler(event) {
     // To support clicking, rather than just click-and-hold, we immediately
     // modify the state of the cell at the position of the mouse press, and
     // then add it to cellMap so holdDraw() knows we've already visited it.
-    if (mouseDownButton === 0) {
+    if (drawing.mouseDownButton === 0) {
       // If left-click, flip state of cell at mouse.
       flipCellAtCoords(xPos, yPos);
-    } else if (mouseDownButton === 2) {
+    } else if (drawing.mouseDownButton === 2) {
       // If right-click, set cell at mouse to dead.
       grid.setCellState(i, j, 0);
-      drawCell(i, j, 0);
+      drawing.drawCell(i, j, 0);
     }
     cellMap.set(i, j, grid.getCellState(i, j));
-    isMouseDown = true;
+    drawing.isMouseDown = true;
   }
 }
 
@@ -221,24 +213,24 @@ function canvasMouseDownHandler(event) {
 function changePatternFromDropdown() {
   const patternName = (document.getElementById("selectPattern")).value;
   grid.changePattern(presetPatterns[patternName].grid);
-  drawGrid();
+  drawing.drawGrid(grid);
 }
 
 /* "Pauses" drawing, by having loopGrid() do nothing but call itself again. */
 function pause() {
-  isPaused = true;
+  drawing.isPaused = true;
   pauseButton.innerHTML = 'Play';
 }
 
 /* "Unpauses" loopGrid(). */
 function unpause() {
-  isPaused = false;
+  drawing.isPaused = false;
   pauseButton.innerHTML = 'Pause';
 }
 
 /* Controls whether the grid automatically steps forward. */
 function pauseButtonHandler() {
-  if (isPaused) {
+  if (drawing.isPaused) {
     unpause();
   } else {
     pause();
@@ -255,14 +247,24 @@ function keydownHandler(event) {
   const key = event.code;
   if (key === 'ArrowLeft') {
     event.preventDefault(); // Prevents key from executing its default action.
-    clickAndHold(document, [pause], [previousStep, drawPreviousGrid], 'keyup');
+    clickAndHold(document, [pause], [previousStep, drawPreviousGridWrapper], 'keyup');
   } else if (key === 'ArrowRight') {
     event.preventDefault();
-    clickAndHold(document, [pause], [nextStep, drawNextGrid], 'keyup');
+    clickAndHold(document, [pause], [nextStep, drawNextGridWrapper], 'keyup');
   } else if (key === 'Space') {
     event.preventDefault();
     pauseButtonHandler();
   }
+}
+
+/* Wrapper to pass args to `drawing.drawPreviousGrid()` without binding. */
+function drawPreviousGridWrapper() {
+  drawing.drawPreviousGrid();
+}
+
+/* Wrapper to pass args to `drawing.drawNextGrid()` without binding. */
+function drawNextGridWrapper() {
+  drawing.drawNextGrid();
 }
 
 /* Note on previousStep() and nextStep():
@@ -288,12 +290,12 @@ function nextStep() {
 
 /* Wrapper for calling clickAndHoldButton() with previousStep. */
 function clickAndHoldPreviousStepButton() {
-  clickAndHold(previousStepButton, [pause], [previousStep, drawPreviousGrid], 'mouseup');
+  clickAndHold(previousStepButton, [pause], [previousStep, drawPreviousGridWrapper], 'mouseup');
 }
 
 /* Wrapper for calling clickAndHoldButton() with nextStep. */
 function clickAndHoldNextStepButton() {
-  clickAndHold(nextStepButton, [pause], [nextStep, drawNextGrid], 'mouseup');
+  clickAndHold(nextStepButton, [pause], [nextStep, drawNextGridWrapper], 'mouseup');
 }
 
 /*
@@ -358,15 +360,15 @@ function stepInputHandler() {
   if ( !isNaN(desiredStep) ) {
     // Empty input box will raise NaN warning, so we check before proceeding.
     grid.goToStep(desiredStep);
-    drawGrid();
+    drawing.drawGrid();
     stepInput.value = desiredStep;
   }
 }
 
 /* Changes the delay between steps to the value of the stepDelaySlider. */
 function changeDelayBetweenSteps() {
-  delay = stepDelaySlider.value;
-  updateStepDelaySliderText(delay);
+  drawing.delay = stepDelaySlider.value;
+  updateStepDelaySliderText(drawing.delay);
 }
 
 /* Flips state of the cell at the given canvas coordinates.
@@ -375,31 +377,32 @@ function changeDelayBetweenSteps() {
 function flipCellAtCoords(xPos, yPos) {
   let [i, j] = getCellFromCoords(xPos, yPos); // Row and column of cell
   grid.flipCell(i, j);
-  drawCell(i, j, grid.getCellState(i, j)); // Draw the new cell state on canvas.
+  drawing.drawCell(i, j, grid.getCellState(i, j)); // Draw the new cell state on canvas.
 }
 
 /* Gets the row and column of the cell on the canvas at the xy coordinate. */
 function getCellFromCoords(xPos, yPos) {
   return [
-    Math.floor(yPos / cellSize), // Row index
-    Math.floor(xPos / cellSize), // Column index
+    Math.floor(yPos / drawing.cellSize), // Row index
+    Math.floor(xPos / drawing.cellSize), // Column index
   ];
 }
 
 /* Checks whether the given xy coordinate in the canvas is within the grid. */
 function inGridBoundaries(xPos, yPos) {
-  return ((0 <= xPos && xPos <= xMax) && (0 <= yPos && yPos <= yMax));
+  return (
+    (0 <= xPos && xPos <= drawing.xMax) &&
+    (0 <= yPos && yPos <= drawing.yMax)
+  );
 }
 
 
-/* Drawing logic
+/* Drawing logic which mutates `grid` (pure drawing logic is in 'drawing.js').
  *
- * Most of these do not change the grid state, but there are two which do:
- *  - `loopGrid()` mutates the `grid` object if `isPaused === false`.
- *  - `holdDraw` mutates the `grid` object.
+ * `loopGrid()` mutates `grid` if `isPaused === false`.
+ * `holdDraw` mutates `grid`.
  *
- * Aside from those two, the only non-canvas changes any of these perform are
- * that the drawGrid functions update the step count HTML element.
+ * TODO: I want to also put these in the `Drawing` class eventually.
  */
 
 /* Animation frame loop for drawing the grid.
@@ -412,110 +415,15 @@ function inGridBoundaries(xPos, yPos) {
  * Note: In the case where isPaused === false, this mutates the `grid` object.
  */
 function loopGrid() {
-  if (isPaused) {
+  if (drawing.isPaused) {
     // We don't do anything if it's paused, just call again
-    setTimeout(() => requestAnimationFrame(loopGrid), delay);
+    setTimeout(() => requestAnimationFrame(loopGrid), drawing.delay);
   } else {
     // If it's playing, then we move forward 1 step, then call again
     nextStep(); // Note: This mutates `grid` object by moving it forward 1 step.
-    drawNextGrid();
-    setTimeout(() => requestAnimationFrame(loopGrid), delay);
+    drawing.drawNextGrid();
+    setTimeout(() => requestAnimationFrame(loopGrid), drawing.delay);
   }
-}
-
-/* Draws the grid and step count. Does NOT modify the grid or step count.
- * Draws every cell, even if its state has not changed.
- */
-function drawGrid() {
-  updateStepCountText(grid.step);
-  // Goes through each row and column in the grid, and draws each cell.
-  for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
-    for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
-      drawCell(i, j, grid.getCellState(i, j));
-    }
-  }
-}
-
-/*
- * Draws the previous grid and step count. Does NOT modify the grid or step count.
- * Only draws cells whose states have changed from the next step.
- */
-function drawPreviousGrid() {
-  updateStepCountText(grid.step);
-  // Goes through each row and column in the grid, and draws changed cells.
-  for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
-    for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
-
-      const cellState = grid.getCellState(i, j);
-      const nextCellState = grid.getNextCellState(i, j);
-      if (cellState !== nextCellState) {
-        // Only draw the cell if its state changed from the next step.
-        drawCell(i, j, cellState);
-      }
-
-    }
-  }
-}
-
-/* Draws the next grid and step count. Does NOT modify the grid or step count.
- * Only draws cells whose states have changed from the previous step.
- */
-function drawNextGrid() {
-  updateStepCountText(grid.step);
-  // Goes through each row and column in the grid, and draws changed cells.
-  for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
-    for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
-
-      const cellState = grid.getCellState(i, j);
-      const previousCellState = grid.getPreviousCellState(i, j);
-      if (cellState !== previousCellState) {
-        // Only draw the cell if its state changed from the previous step.
-        drawCell(i, j, cellState);
-      }
-
-    }
-  }
-}
-
-/* Draws the cell at grid[i]][j] on the canvas, colored based on its state. */
-function drawCell(i, j, cellState) {
-  const x0 = (j * cellSize); // x-coordinate of upper-left corner of cell
-  const y0 = (i * cellSize); // y-coordinate of upper-left corner of cell
-
-  // We use `cellSize - 1` as the side lengths, because otherwise a cell with
-  // coordinates (x0, y0) will overlap with the cell below it, the cell to right
-  // of it, and the cell to the lower-right of it, since all of those use one of
-  // x0 or y0 in their upper-left coordinate.
-  if (cellState == 1) {
-    // Live cells are colored whatever ctx.fillStyle is set to (default: red).
-    ctx.fillRect(x0, y0, cellSize - 1, cellSize - 1);
-  } else {
-    // Dead cells are transparent and will be background color (default: white).
-    ctx.clearRect(x0, y0, cellSize - 1, cellSize - 1);
-  }
-}
-
-/* Draws the gridlines separating each cell. */
-function drawGridLines() {
-  const width = cellSize - 1;
-  const height = cellSize - 1;
-
-  for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
-    for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
-      ctx.strokeRect(j * cellSize, i * cellSize, width, height);
-    }
-  }
-}
-
-/* Sets up canvas on page load. */
-function initialCanvasDraw() {
-  // Set gridline color and draw gridlines.
-  ctx.fillStyle = 'black';
-  drawGridLines();
-  // Set live cell color and draw cells.
-  // ctx.fillStyle is not changed after this, since it's only used in drawGrid.
-  ctx.fillStyle = 'red';
-  drawGrid();
 }
 
 /* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
@@ -556,9 +464,9 @@ function holdDraw(event) {
 
   // Determine the new state we set cells to, depending on mouse button.
   let newCellState;
-  if (mouseDownButton === 0) {
+  if (drawing.mouseDownButton === 0) {
     newCellState = 1; // Click-and-hold left click turns cells alive.
-  } else if (mouseDownButton === 2) {
+  } else if (drawing.mouseDownButton === 2) {
     newCellState = 0; // Click-and-hold right click turns cells dead.
   }
 
@@ -580,7 +488,7 @@ function holdDraw(event) {
         if (cellState !== newCellState) {
           // If is not in the new state, we set it to the new state.
           grid.setCellState(i, j, newCellState);
-          drawCell(i, j, newCellState); // Draw the new cell state on canvas.
+          drawing.drawCell(i, j, newCellState); // Draw the new cell state on canvas.
         }
         // But if the cell is already in the new state, we don't touch it.
         // We just add it to the visited cells and move on.
