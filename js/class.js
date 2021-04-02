@@ -8,20 +8,35 @@ import * as Patterns from './patterns.js';
 class GameOfLifeGrid {
 
   // TODO: Add parameter to pass cells, then center those.
+  /* Creates a randomly-populated GameOfLifeGrid with given rows and columns. */
   constructor(rowCount, colCount) {
     this.rowCount = rowCount;
     this.colCount = colCount;
+    /* rowCount x colCount array of cells, randomly set alive/dead. */
     this.cells = Patterns.createRandomGrid(rowCount, colCount);
+    /* rowCount x colCount array of the "start" state of the cells. */
     this.startCells = Grid.copyGrid(this.cells);
-    this.nextCells = undefined; // Stores states of next cells in previousStep()
+    /* rowCount x colCount array of the "next" state of the cells.
+     * Assigned when `this.previousStep()` is called, so that drawing logic only
+     * draws the cells whose states have changed. */
+    this.nextCells = undefined;
+    /* Stack of past cell states, where history[n] is the cells at step n.
+     *
+     * `history[n][i][j]` is the state, at step n, of the cell ij.
+     *
+     * NOTE: The current cells are NOT in the stack; that is, if the current
+     *       step is step n, then history only contains up to n-1. */
     this.history = [];
+    /* Current step. */
     this.step = 0;
   }
 
 
   // Step functions
   // --------------
-  // These transition the grid state forward/backward, using Game of Life rules.
+  // These transition the state of all cells forward/backward, using GOL rules.
+  //
+  // These mutate `step`, `cells`, `history`, and `nextCells`.
 
   /* Moves the grid state back one step. */
   previousStep() {
@@ -57,32 +72,32 @@ class GameOfLifeGrid {
         this.previousStep();
       }
     } else {
-      // in this case we do nothing because n == step
+      // in this case we do nothing because n === step
     }
   }
 
   // Cell functions
   // --------------
-  // These access or modify individual cells in the grid.
+  // These get or set the state of specific cells in the grid.
+  //
+  // These only modify individual ij indices of `cells`. */
 
-  /* Returns the state of the cell at row i, column j. */
+  /* Returns the current state of the cell ij. */
   getCellState(i, j) {
     return this.cells[i][j];
   }
 
-  /* Sets the cell at row i, column j to the given state. */
+  /* Sets the curent state of the cell ij. */
   setCellState(i, j, state) {
     this.cells[i][j] = state;
   }
 
-  /* Flips the state of the cell at i,j. */
+  /* Flips the current state of the cell ij. */
   flipCell(i, j) {
     this.cells[i][j] = (this.cells[i][j] === 0 ? 1 : 0);
   }
 
-  /*
-   * Returns the previous state of the cell at (i, j), or NaN if there is no
-   * previous state.
+  /* Returns the previous state of the cell ij, or NaN if there is none.
    *
    * This is used in the drawNextGrid function, to optimise canvas rendering by
    * only drawing cells which have changed from the previous step.
@@ -96,9 +111,7 @@ class GameOfLifeGrid {
     }
   }
 
-  /*
-   * Returns the next state of the cell at (i, j), or NaN if there is no
-   * next state.
+  /* Returns the next state of the cell ij, or NaN if there is none.
    *
    * This is used in the drawPreviousGrid function, to optimise canvas rendering
    * by only drawing cells which have changed from the next step.
@@ -114,9 +127,7 @@ class GameOfLifeGrid {
 
   // Pattern functions
   // -----------------
-  // These modify the state of the whole grid.
-  // The "state" of the grid is used loosely to refer to the combination of
-  // its cells, its history, its step count, and its startCells.
+  // These mutate GameOfLifeGrid properties in ways unrelated to the GOL rules.
 
   /* Sets all cells to zero and clears history and step count. */
   clear() {
@@ -272,7 +283,7 @@ class ToroidalGameOfLifeGrid extends GameOfLifeGrid {
   /* Moves the grid state forward one step. */
   nextStep() {
     this.history.push(this.cells);
-    this.cells = Life.transitionTorusGrid(this.cells);
+    this.cells = Life.transitionTorusGrid(this.cells); // (*) Only difference
     this.step += 1;
   }
 }
