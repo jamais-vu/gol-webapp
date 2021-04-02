@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 
-import * as Patterns from './patterns.js';
+import { createZerosGrid } from './patterns.js';
 
 // This module contains functions for manipulating grids in ways unrelated to
 // the Game of Life transition rules.
@@ -263,7 +263,7 @@ function removeEmptyColumnsFromEnd(grid) {
 function transpose(arr) {
   const numRows = arr.length;
   const numCols = arr[0].length;
-  let transposedArr = Patterns.createZerosGrid(numCols, numRows);
+  let transposedArr = createZerosGrid(numCols, numRows);
   for (let i = 0; i < numRows; i++ ) {
     for (let j = 0; j < numCols; j++) {
       transposedArr[j][i] = arr[i][j];
