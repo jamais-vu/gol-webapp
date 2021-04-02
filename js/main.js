@@ -29,15 +29,15 @@ const ctx = canvas.getContext('2d'); // specifies canvas is 2d
 
 /* We set the canvas size to be slightly less than the viewport size, since
  * we don't want to user to have to scroll horizontally to see the full grid. */
-const width = canvas.width = (window.innerWidth * 0.95); // viewport width
-const height = canvas.height = (window.innerHeight * 0.95); // viewport height
+canvas.width = (window.innerWidth * 0.95); // viewport width
+canvas.height = (window.innerHeight * 0.95); // viewport height
 
 /* Using a preset cell size, we calculate the maximum number of rows and columns
  * that will fit in the canvas, and then create a grid with those numbers.
  */
 const cellSize = 10; // Cell square side length, in pixels.
-const rows = Math.floor(height / cellSize);
-const columns = Math.floor(width / cellSize);
+const rows = Math.floor(canvas.height / cellSize);
+const columns = Math.floor(canvas.width / cellSize);
 let grid = new ToroidalGameOfLifeGrid(rows, columns);
 
 /* Calculate grid dimensions as xy coordinates.
@@ -61,7 +61,7 @@ let mouseDownButton;         // Set 0 if mousedown is left-click, 2 for right.
 updateStepDelaySliderText(delay); // Show initial delay between grid steps.
 populateSelectPattern();          // Populate preset patterns dropdown menu.
 populateDebugInfoTable(xMax, yMax, rows, columns, cellSize);
-windowSizeCheck(width, height);   // Check whether user's browser is a good size
+windowSizeCheck(xMax, yMax);   // Check whether user's browser is a good size
 
 initialCanvasDraw(); // Start by drawing the grid for step 0.
 
