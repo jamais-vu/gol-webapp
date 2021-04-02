@@ -4,7 +4,7 @@ import { ToroidalGameOfLifeGrid } from './class.js';
 import { updateStepCountText } from './html-helpers.js';
 
 /* This class takes care of drawing the cells on the canvas. */
-class Drawing {
+export class Drawing {
 
   constructor(ctx, grid, cellSize, xMax, yMax) {
     /* The canvas context. */
@@ -122,7 +122,3 @@ class Drawing {
   }
 
 }
-
-export {
-  Drawing
-};
