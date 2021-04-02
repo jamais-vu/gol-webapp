@@ -3,6 +3,19 @@
 import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 
+/* This file contains logic for drawing the grid on canvas, and for handling
+ * user interactions via button or mouse press.
+ *
+ * Structure (in order):
+ * 1) Set up the canvas and grid.
+ * 2) Initalize variables relevant for drawing and user interaction.
+ * 3) Add event listeners to buttons and other elements, and declare
+ * handlers for those events.
+ * 4) Functions which modify HTML elements to display various
+ * data related to the canvas and mouse.
+ * 5) Drawing functions.
+ */
+
 // Set up canvas
 const canvas = document.querySelector('.myCanvas');
 const ctx = canvas.getContext('2d'); // specifies canvas is 2d
@@ -13,15 +26,11 @@ const width = canvas.width = (window.innerWidth * 0.95); // viewport width
 const height = canvas.height = (window.innerHeight * 0.95); // viewport height
 
 /* Using a preset cell size, we calculate the maximum number of rows and columns
- * that will fit in the canvas. */
+ * that will fit in the canvas, and then create a grid with those numbers.
+ */
 const cellSize = 10; // Cell square side length, in pixels.
 const rows = Math.floor(height / cellSize);
 const columns = Math.floor(width / cellSize);
-
-/* Create a new toroidal grid, with the given number of rows and columns.
- * This treats the 2d grid as the surface of a 3d torus, making the grid
- * effectively endless by having the edges of the 2d grid connect to their
- * opposite edges. */
 let grid = new ToroidalGameOfLifeGrid(rows, columns);
 
 /* Calculate grid dimensions as xy coordinates.
@@ -41,6 +50,7 @@ let isPaused = true;         // Drawing starts paused.
 let isMouseDown = false;     // Whether the mouse is down on the canvas.
 let mouseDownButton;         // Set 0 if mousedown is left-click, 2 for right.
 
+/* Initalize HTML elements and draw gridlines and cells on canvas. */
 initializeHTMLElements();    // Set initial values of various HTML elements.
 initialCanvasDraw();         // Start by drawing the grid for step 0.
 
