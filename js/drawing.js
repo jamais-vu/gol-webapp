@@ -71,7 +71,7 @@ export class Drawing {
         const nextCellState = this.grid.getNextCellState(i, j);
         if (cellState !== nextCellState) {
           // Only draw the cell if its state changed from the next step.
-          drawCell(i, j, cellState);
+          this.drawCell(i, j, cellState);
         }
 
       }
@@ -120,5 +120,4 @@ export class Drawing {
     this.ctx.fillStyle = 'red';
     this.drawGrid();
   }
-
 }
