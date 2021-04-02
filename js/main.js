@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 
-import * as Patterns from './patterns.js';
+import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 
 // Set up canvas
@@ -199,7 +199,7 @@ function canvasMouseDownHandler(event) {
 /* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
 function changePatternFromDropdown() {
   const patternName = (document.getElementById("selectPattern")).value;
-  grid.changePattern(Patterns.presetPatterns[patternName].grid);
+  grid.changePattern(presetPatterns[patternName].grid);
   drawGrid();
 }
 
@@ -408,7 +408,7 @@ function updateWindowMouseCoords(event) {
 function populateSelectPattern() {
   let selectPattern = document.getElementById("selectPattern");
 
-  const patternNames = Object.keys(Patterns.presetPatterns);
+  const patternNames = Object.keys(presetPatterns);
   for (let name of patternNames) {
     selectPattern.innerHTML += `<option value="${name}">${name}</option>`;
   }
