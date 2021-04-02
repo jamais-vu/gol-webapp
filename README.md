@@ -10,7 +10,7 @@ Hold these down to move through multiple states quickly, or use the `Go to step`
 Control whether the grid moves forward automatically with the `Play` button, or by pressing the space bar.<br>
 Use the `Speed` slider to choose the time (in milliseconds) between each step.
 
-Click on the grid to flip the state of any cell. Click-and-hold with the left mouse button to draw live cells, or with the right mouse button to draw dead cells.
+Click on the grid to flip the state of any cell. Click-and-hold with the left mouse button to draw live cells, or with the right mouse button to draw dead cells (note: click-and-hold with right click currently only works for physical buttons, not two-finger touch on touchpad).
 
 `Clear` removes all live cells from the grid.
 
