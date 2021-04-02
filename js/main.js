@@ -14,7 +14,7 @@ const height = canvas.height = (window.innerHeight * 0.95); // viewport height
 
 /* Using a preset cell size, we calculate the maximum number of rows and columns
  * that will fit in the canvas. */
-const cellSize = 10; // Square side length, in pixels.
+const cellSize = 10; // Cell square side length, in pixels.
 const rows = Math.floor(height / cellSize);
 const columns = Math.floor(width / cellSize);
 
@@ -31,38 +31,35 @@ let grid = new ToroidalGameOfLifeGrid(rows, columns);
 const xMax = (columns * cellSize);
 const yMax = (rows * cellSize);
 
-/* Now that we've set the size of the canvas, grid, and cells, we modify the
- * of some HTML elements in our debug table, to show the dimensions of the
- * grid and canvas, and the size and count of cells.
+
+/* Initialize variables used to control drawing and user interactions.
  *
- * This does not affect the state or functionality of the grid or canvas. These
- * are only for displaying information.
- */
-document.getElementById('canvasDimensions').innerHTML = `${xMax}, ${yMax}`;
-document.getElementById('gridDimensions').innerHTML = `${rows}, ${columns}`;
-document.getElementById('cellSize').innerHTML = `${cellSize}x${cellSize} px`;
-document.getElementById('cellCount').innerHTML = `${rows * columns}`;
-document.getElementById('windowDimensions')
-  .innerHTML = `${window.innerWidth}, ${window.innerHeight}`;
-
-/* If the window is not wide or tall enough, suggest the user resize it. */
-if (width < 700 || height < 600) {
-  document.getElementById('windowSizeAlert')
-    .innerHTML = '(Best viewed in a larger window! <a href="">Reload</a>' +
-                 ' the page after resizing.)';}
-
-// Initialize variables used in drawing, populate buttons, and start drawing.
+ * TODO: I dislike using top-level variables here. In the future, we should
+ * encapsulate all the stuff related to drawing in its own class or module. */
 let delay = 500;             // Intial time (ms) between each loopGrid() call.
-updateStepDelaySliderText(); // Initialize HTML element showing delay.
 let isPaused = true;         // Drawing starts paused.
 let isMouseDown = false;     // Whether the mouse is down on the canvas.
 let mouseDownButton;         // Set 0 if mousedown is left-click, 2 for right.
-populateSelectPattern();     // Populate the dropdown menu on page load.
+
+initializeHTMLElements();    // Set initial values of various HTML elements.
 initialCanvasDraw();         // Start by drawing the grid for step 0.
 
-// Button stuff
 
-// Set up all event listeners for the buttons.
+/* UI logic
+ *
+ * First we attach event listeners to various webpage elements.
+ * Then we declare the functions those event listeners call.
+ *
+ * Some functions are declared anonymously in the actual `addEventListener()`
+ * call, either for clarity or due to the shortness of the function itself.
+ */
+
+/* Event Listeners
+ *
+ * Set up event listeners for webpage elements. Ordered alphabetically.
+ * TODO: This looks messy to me. Would like to find a better way to organize.
+ * Maybe place in their own module.
+ */
 
 /* Displays xy position of mouse, relative to upper-left corner of canvas. */
 canvas.addEventListener('mousemove', updateCanvasMouseCoords);
@@ -163,7 +160,12 @@ stepInput.addEventListener('keydown', (event) => {
 window.addEventListener('mousemove', updateWindowMouseCoords);
 
 
-// Functions used for buttons.
+/* Event handlers
+ *
+ * TODO: This is also disorganised. Could order them alphabetically, or in
+ * order of their appearance in the above Event Listeners section. Could also
+ * place in own module.
+ */
 
 /* Gets xy position of mouse, and if it's over the grid, modifies cells. */
 function canvasMouseDownHandler(event) {
@@ -242,12 +244,17 @@ function keydownHandler(event) {
   }
 }
 
-// `previousStep()` and `nextStep()` are wrapper functions for calling their
-// respective GameOfLifeGrid class methods when passed to `clickAndHold`.
-// We could use binding here to pass `grid.previousStep.bind(grid)` and
-// `grid.nextStep.bind(grid)` to `clickAndHold` and that would also work.
-// I'm not sure which is best practice, but I think the wrapper functions are
-// faster.
+/* Note on previousStep() and nextStep():
+ *
+ * `previousStep()` and `nextStep()` are wrapper functions for calling their
+ * respective GameOfLifeGrid class methods when passed to `clickAndHold`.
+ * We could use binding here, and pass `grid.previousStep.bind(grid)` and
+ * `grid.nextStep.bind(grid)` to `clickAndHold` and that would also work.
+ *
+ * I'm not sure which is best practice, but I think the wrapper functions are
+ * faster than binding.
+ */
+
 /* Wrapper function to move the grid state back one step. */
 function previousStep() {
   grid.previousStep();
@@ -324,7 +331,7 @@ function clickAndHold(button, runOnceFunctions, repeatedFunctions, stopEvent) {
   repeat(); // Call repeat() for the first time, to begin the loop.
 }
 
-/* Transitions the grid to the user-inputted step and then draws the grid. */
+/* Transitions the grid to the user-inputted step, and then draws the grid. */
 function stepInputHandler() {
   const desiredStep = parseInt(stepInput.value); // stepInput is the input box
   if ( !isNaN(desiredStep) ) {
@@ -341,8 +348,7 @@ function changeDelayBetweenSteps() {
   updateStepDelaySliderText();
 }
 
-/*
- * Flips state of the cell at the given canvas coordinates.
+/* Flips state of the cell at the given canvas coordinates.
  * Note: This assumes the given coordinates are valid (ie, on the grid).
  */
 function flipCellAtCoords(xPos, yPos) {
@@ -377,7 +383,10 @@ function updateStepDelaySliderText() {
   document.getElementById('stepDelaySliderText').innerHTML = `${delay} ms`;
 }
 
-/* Shows the xy and ij position of the mouse as it moves on the canvas. */
+/* Shows the xy and ij position of the mouse as it moves on the canvas.
+ *
+ * This information is displayed in the `debugInfoTable` element.
+ */
 function updateCanvasMouseCoords(event) {
   const mouseCell = getCellFromCoords(event.offsetX, event.offsetY);
   document.getElementById('canvasMouseCoords')
@@ -386,7 +395,10 @@ function updateCanvasMouseCoords(event) {
     .innerHTML = `${mouseCell[0]}, ${mouseCell[1]}`;
 }
 
-/* Shows the xy position of the mouse as it moves in the window. */
+/* Shows the xy position of the mouse as it moves in the window.
+ *
+ * This information is displayed in the `debugInfoTable` element.
+ */
 function updateWindowMouseCoords(event) {
   document.getElementById('windowMouseCoords')
     .innerHTML = `${event.clientX}, ${event.clientY}`;
@@ -402,8 +414,52 @@ function populateSelectPattern() {
   }
 }
 
+/* Populates child elements of the `debugInfoTable` element
+ *
+ * Unlike the mouse position, which is updated upon mouse move, the values here
+ * are determined when the page is first loaded, and do not change thereafter.
+ */
+function populateDebugInfoTable() {
+  // xy-coordinates, in pixels, of the bottom-right.
+  document.getElementById('canvasDimensions').innerHTML = `${xMax}, ${yMax}`;
+  // Count of rows and columns in the grid.
+  document.getElementById('gridDimensions').innerHTML = `${rows}, ${columns}`;
+  // Size, in pixels, of each cell.
+  document.getElementById('cellSize').innerHTML = `${cellSize}x${cellSize} px`;
+  // Count of total number of cells in the grid.
+  document.getElementById('cellCount').innerHTML = `${rows * columns}`;
+  // xy size, in pixels, of the browser window.
+  document.getElementById('windowDimensions')
+    .innerHTML = `${window.innerWidth}, ${window.innerHeight}`;
+}
 
-// Functions for drawing on the canvas.
+/* If the window is not wide or tall enough, suggest the user resize it. */
+function windowSizeCheck() {
+if (width < 700 || height < 600) {
+  document.getElementById('windowSizeAlert')
+    .innerHTML = '(Best viewed in a larger window! <a href="">Reload</a>' +
+                 ' the page after resizing.)';
+  }
+}
+
+/* Sets initial values of HTML elements on page load. */
+function initializeHTMLElements() {
+  updateStepDelaySliderText(); // Show initial delay between grid steps.
+  populateSelectPattern();     // Populate preset patterns dropdown menu.
+  populateDebugInfoTable();    // Populate debug info.
+  windowSizeCheck();           // Check whether user's browser is a good size.
+}
+
+
+/* Drawing logic
+ *
+ * Most of these do not change the grid state, but there are two which do:
+ *  - `loopGrid()` mutates the `grid` object if `isPaused === false`.
+ *  - `holdDraw` mutates the `grid` object.
+ *
+ * Aside from those two, the only non-canvas changes any of these perform are
+ * that the drawGrid functions update the step count HTML element.
+ */
 
 /* Animation frame loop for drawing the grid.
  *
@@ -411,6 +467,8 @@ function populateSelectPattern() {
  * If not paused: draws the grid, then transitions forward one step
  *
  * and in either case, ends by calling itself again with the given delay.
+ *
+ * Note: In the case where isPaused === false, this mutates the `grid` object.
  */
 function loopGrid() {
   if (isPaused) {
@@ -418,7 +476,7 @@ function loopGrid() {
     setTimeout(() => requestAnimationFrame(loopGrid), delay);
   } else {
     // If it's playing, then we move forward 1 step, then call again
-    nextStep();
+    nextStep(); // Note: This mutates `grid` object by moving it forward 1 step.
     drawNextGrid();
     setTimeout(() => requestAnimationFrame(loopGrid), delay);
   }
@@ -547,6 +605,8 @@ let cellMap = {
 /* Tracks which cells the mouse moves over on canvas as long as the mouse button
  * is held down, and sets cells to alive if the mouse button is left-click and
  * dead if the mouse button is right-click.
+ *
+ * Note: This mutates the `grid` object.
  */
 function holdDraw(event) {
 
