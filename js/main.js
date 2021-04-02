@@ -20,9 +20,7 @@ import {
  * 2) Initalize variables relevant for drawing and user interaction.
  * 3) Add event listeners to buttons and other elements, and declare
  * handlers for those events.
- * 4) Functions which modify HTML elements to display various
- * data related to the canvas and mouse.
- * 5) Drawing functions.
+ * 4) Drawing functions.
  */
 
 // Set up canvas
