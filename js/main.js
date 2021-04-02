@@ -2,6 +2,15 @@
 
 import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
+import {
+  populateDebugInfoTable,
+  populateSelectPattern,
+  updateCanvasMouseCoords,
+  updateStepCountText,
+  updateStepDelaySliderText,
+  updateWindowMouseCoords,
+  windowSizeCheck,
+} from './html-helpers.js';
 
 /* This file contains logic for drawing the grid on canvas, and for handling
  * user interactions via button or mouse press.
@@ -51,8 +60,12 @@ let isMouseDown = false;     // Whether the mouse is down on the canvas.
 let mouseDownButton;         // Set 0 if mousedown is left-click, 2 for right.
 
 /* Initalize HTML elements and draw gridlines and cells on canvas. */
-initializeHTMLElements();    // Set initial values of various HTML elements.
-initialCanvasDraw();         // Start by drawing the grid for step 0.
+updateStepDelaySliderText(delay); // Show initial delay between grid steps.
+populateSelectPattern();          // Populate preset patterns dropdown menu.
+populateDebugInfoTable(xMax, yMax, rows, columns, cellSize);
+windowSizeCheck(width, height);   // Check whether user's browser is a good size
+
+initialCanvasDraw(); // Start by drawing the grid for step 0.
 
 
 /* UI logic
@@ -355,7 +368,7 @@ function stepInputHandler() {
 /* Changes the delay between steps to the value of the stepDelaySlider. */
 function changeDelayBetweenSteps() {
   delay = stepDelaySlider.value;
-  updateStepDelaySliderText();
+  updateStepDelaySliderText(delay);
 }
 
 /* Flips state of the cell at the given canvas coordinates.
@@ -378,86 +391,6 @@ function getCellFromCoords(xPos, yPos) {
 /* Checks whether the given xy coordinate in the canvas is within the grid. */
 function inGridBoundaries(xPos, yPos) {
   return ((0 <= xPos && xPos <= xMax) && (0 <= yPos && yPos <= yMax));
-}
-
-
-// Functions for updating HTML document elements.
-
-/* Updates the stepCountText HTML element to show current step count. */
-function updateStepCountText() {
-  document.getElementById('stepCountText').innerHTML = `${grid.step}`;
-}
-
-/* Updates the stepDelaySliderText HTML element to show current delay. */
-function updateStepDelaySliderText() {
-  document.getElementById('stepDelaySliderText').innerHTML = `${delay} ms`;
-}
-
-/* Shows the xy and ij position of the mouse as it moves on the canvas.
- *
- * This information is displayed in the `debugInfoTable` element.
- */
-function updateCanvasMouseCoords(event) {
-  const mouseCell = getCellFromCoords(event.offsetX, event.offsetY);
-  document.getElementById('canvasMouseCoords')
-    .innerHTML = `${event.offsetX}, ${event.offsetY}`;
-  document.getElementById('canvasMouseCell')
-    .innerHTML = `${mouseCell[0]}, ${mouseCell[1]}`;
-}
-
-/* Shows the xy position of the mouse as it moves in the window.
- *
- * This information is displayed in the `debugInfoTable` element.
- */
-function updateWindowMouseCoords(event) {
-  document.getElementById('windowMouseCoords')
-    .innerHTML = `${event.clientX}, ${event.clientY}`;
-}
-
-/* Populates dropdown menu with preset patterns. */
-function populateSelectPattern() {
-  let selectPattern = document.getElementById("selectPattern");
-
-  const patternNames = Object.keys(presetPatterns);
-  for (let name of patternNames) {
-    selectPattern.innerHTML += `<option value="${name}">${name}</option>`;
-  }
-}
-
-/* Populates child elements of the `debugInfoTable` element
- *
- * Unlike the mouse position, which is updated upon mouse move, the values here
- * are determined when the page is first loaded, and do not change thereafter.
- */
-function populateDebugInfoTable() {
-  // xy-coordinates, in pixels, of the bottom-right.
-  document.getElementById('canvasDimensions').innerHTML = `${xMax}, ${yMax}`;
-  // Count of rows and columns in the grid.
-  document.getElementById('gridDimensions').innerHTML = `${rows}, ${columns}`;
-  // Size, in pixels, of each cell.
-  document.getElementById('cellSize').innerHTML = `${cellSize}x${cellSize} px`;
-  // Count of total number of cells in the grid.
-  document.getElementById('cellCount').innerHTML = `${rows * columns}`;
-  // xy size, in pixels, of the browser window.
-  document.getElementById('windowDimensions')
-    .innerHTML = `${window.innerWidth}, ${window.innerHeight}`;
-}
-
-/* If the window is not wide or tall enough, suggest the user resize it. */
-function windowSizeCheck() {
-if (width < 700 || height < 600) {
-  document.getElementById('windowSizeAlert')
-    .innerHTML = '(Best viewed in a larger window! <a href="">Reload</a>' +
-                 ' the page after resizing.)';
-  }
-}
-
-/* Sets initial values of HTML elements on page load. */
-function initializeHTMLElements() {
-  updateStepDelaySliderText(); // Show initial delay between grid steps.
-  populateSelectPattern();     // Populate preset patterns dropdown menu.
-  populateDebugInfoTable();    // Populate debug info.
-  windowSizeCheck();           // Check whether user's browser is a good size.
 }
 
 
@@ -496,7 +429,7 @@ function loopGrid() {
  * Draws every cell, even if its state has not changed.
  */
 function drawGrid() {
-  updateStepCountText();
+  updateStepCountText(grid.step);
   // Goes through each row and column in the grid, and draws each cell.
   for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
     for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
@@ -510,7 +443,7 @@ function drawGrid() {
  * Only draws cells whose states have changed from the next step.
  */
 function drawPreviousGrid() {
-  updateStepCountText();
+  updateStepCountText(grid.step);
   // Goes through each row and column in the grid, and draws changed cells.
   for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
     for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
@@ -530,7 +463,7 @@ function drawPreviousGrid() {
  * Only draws cells whose states have changed from the previous step.
  */
 function drawNextGrid() {
-  updateStepCountText();
+  updateStepCountText(grid.step);
   // Goes through each row and column in the grid, and draws changed cells.
   for (let i = 0; i < grid.rowCount; i++) {   // i is y-axis (row index).
     for (let j = 0; j < grid.colCount; j++) { // j is x-axis (column index).
