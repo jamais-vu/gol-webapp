@@ -123,26 +123,24 @@ export class Drawing {
 
   /* Animation frame loop for drawing the grid.
    *
-   * If paused: does nothing
-   * If not paused: draws the grid, then transitions forward one step
+   * If paused: does nothing.
+   * If not paused: transitions forward one step, then draws the grid.
    *
    * and in either case, ends by calling itself again with the given delay.
    *
    * Note: In the case where isPaused === false, this mutates the `grid` object.
    */
   loopGrid() {
-    if (this.isPaused) {
-      // We don't do anything if it's paused, just call again
-      setTimeout(() => {
-        requestAnimationFrame(this.loopGrid.bind(this));
-      }, this.delay);
-    } else {
-      // If it's playing, then we move forward 1 step, then call again
+    // If it's playing, then we move forward 1 step and draw that step.
+    if (this.isPaused === false) {
       this.grid.nextStep(); // Note: This mutates `grid` object by moving it forward 1 step.
       this.drawNextGrid();
-      setTimeout(() => {
-        requestAnimationFrame(this.loopGrid.bind(this));
-      }, this.delay );
     }
+    // And regardless of whether it was paused or not, we queue the next call.
+    // We need to bind `this` for loopGrid so we don't lose context when passing
+    // it to setTimeout.
+    setTimeout(() => {
+      requestAnimationFrame(this.loopGrid.bind(this));
+    }, this.delay);
   }
 }
