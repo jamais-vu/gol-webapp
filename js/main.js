@@ -75,8 +75,7 @@ drawing.initialCanvasDraw();
 /* Displays xy and ij coordinates of the mouse as it moves over the canvas.
  *
  * The xy-coordinate is relative to the upper-left of the canavas.
- * The ij-coordinate is the row and column of the grid.
-  */
+ * The ij-coordinate is the row and column of the grid. */
 canvas.addEventListener('mousemove', () => {
   updateCanvasMouseCoords(event, drawing.cellSize);
 });
@@ -94,7 +93,7 @@ canvas.addEventListener('mouseup', () => {
   drawing.cellMap.clear(); // We empty the map of visited cells when mouse is lifted.
 });
 /* Sets isMouseDown to false if the mouse moves out of the canvas, regardless of
-   whether the mouse is still held down. */
+ * whether the mouse is still held down. */
 canvas.addEventListener('mouseout', () => {
   drawing.isMouseDown = false;
   drawing.cellMap.clear();
@@ -141,13 +140,11 @@ randomizeButton.addEventListener('click', () => {
 });
 randomizeButton.addEventListener('click', pause);
 
-/*
- * Resets the displayed grid to the state it was in when the page was loaded,
+/* Resets the displayed grid to the state it was in when the page was loaded,
  * prior to any user modifications.
  *
  * Note: This is different from its state at step 0, since the user may modify
- * the grid at any step, including step 0.
- */
+ * the grid at any step, including step 0. */
 resetPatternButton.addEventListener('click', () => {
   grid.reset();
   drawing.drawGrid();
