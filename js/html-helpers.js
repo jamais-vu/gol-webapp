@@ -6,7 +6,7 @@ import { presetPatterns } from './patterns.js';
 /* Functions for modifying HTML elements.
  *
  * These populate HTML elements with initial values related to the grid and
- * canvas, and for update those values as they change.
+ * canvas, and update those values as they change.
  */
 
 /* Sets initial values of HTML elements on page load.
