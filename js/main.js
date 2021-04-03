@@ -153,6 +153,7 @@ setAsStartPatternButton.addEventListener('click', () => {
   grid.setAsStart();
  drawing.drawGrid();
 });
+setAsStartPatternButton.addEventListener('click', pause);
 
 /* Changes the delay between drawing frames. */
 stepDelaySlider.addEventListener('input', changeDelayBetweenSteps);
