@@ -72,7 +72,11 @@ drawing.initialCanvasDraw();
  * Maybe place in their own module.
  */
 
-/* Displays xy position of mouse, relative to upper-left corner of canvas. */
+/* Displays xy and ij coordinates of the mouse as it moves over the canvas.
+ *
+ * The xy-coordinate is relative to the upper-left of the canavas.
+ * The ij-coordinate is the row and column of the grid.
+  */
 canvas.addEventListener('mousemove', () => {
   updateCanvasMouseCoords(event, drawing.cellSize);
 });
