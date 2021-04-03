@@ -181,13 +181,7 @@ stepInput.addEventListener('keydown', (event) => {
 window.addEventListener('mousemove', updateWindowMouseCoords);
 
 
-/* Event handlers
- *
- * TODO: This is also disorganised. Could order them alphabetically, or in
- * order of their appearance in the above Event Listeners section. Could also
- * place in own module.
- */
-
+/* Event handlers */
 
 /* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
 function changePatternFromDropdown() {
