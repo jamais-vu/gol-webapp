@@ -1,9 +1,10 @@
 /* jshint esversion: 6 */
 
 import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
-import { clickAndHold } from './clickAndHold.js';
-import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
+import { clickAndHold } from './clickAndHold.js';
+import { Drawing } from './drawing.js';
+import { presetPatterns } from './patterns.js';
 
 import {
   initializeHTMLElements,
@@ -13,7 +14,6 @@ import {
   updateWindowMouseCoords,
 } from './html-helpers.js';
 
-import { Drawing } from './drawing.js';
 
 /* This file contains logic for drawing the grid on canvas, and for handling
  * user interactions via button or mouse press.
