@@ -15,15 +15,14 @@ import {
 } from './html-helpers.js';
 
 
-/* This file contains logic for drawing the grid on canvas, and for handling
- * user interactions via button or mouse press.
- *
- * Structure (in order):
- * 1) Set up the canvas and create a grid object based on canvas size.
- * 2) Create a Drawing object for handling all canvas drawing.
- * 3) Add event listeners to buttons and other elements, and declare
- * handlers for those events.
+/* This script is what sets up the actual web page.
+ * Based on the canvas size, we create a Game of Life `grid`, which handles all
+ * the Game of Life stuff, and a `drawing`, which handles all the drawing logic.
+ * Then we declare a bunch of event handlers and attach those to various browser
+ * events related to user interactions.
  */
+
+/* Game of Life grid and Drawing setup */
 
 // Set up canvas
 const canvas = document.querySelector('.myCanvas');
@@ -73,7 +72,7 @@ const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
 const boundPreviousStep = grid.previousStep.bind(grid);
 const boundNextStep = grid.nextStep.bind(grid);
 const pause = drawing.pause.bind(drawing);
-const unpause = drawing.unpause.bind(drawing);
+const unpause = drawing.unpause.bind(drawing); // TODO: Can remove, not used.
 
 /* Changes the delay between steps to the value of the stepDelaySlider. */
 function changeDelayBetweenSteps() {
