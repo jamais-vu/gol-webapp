@@ -186,17 +186,12 @@ function canvasMouseDownHandler(event) {
   // Store which mouse button was pressed, for use in holdDraw()
   drawing.mouseDownButton = event.button;
 
-  // TODO: Remove these when done
-  // console.log('main.js: canvasMouseDownHandler called');
-  // console.log('main.js: drawing.isMouseDown should be false: ${drawing.isMouseDown}');
-
   // xy-coordinate of mouse press, relative to canvas origin.
   const xPos = event.offsetX;
   const yPos = event.offsetY;
 
   // Only update the grid if the user clicked within its bounds.
   if (inGridBoundaries(xPos, yPos, drawing.xMax, drawing.yMax)) {
-    // console.log('main.js: is in grid boundaries'); // TODO: Remove these when done
     // Get the row and column of the mouse press.
     let [i, j] = getCellFromCoords(xPos, yPos, drawing.xMax, drawing.yMax);
 
@@ -213,7 +208,6 @@ function canvasMouseDownHandler(event) {
     }
     drawing.cellMap.set(i, j, grid.getCellState(i, j));
     drawing.isMouseDown = true;
-    // console.log('main.js: drawing.isMouseDown should be true: ${drawing.isMouseDown}'); // TODO: Remove these when done
   }
 }
 
