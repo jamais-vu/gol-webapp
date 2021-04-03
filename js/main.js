@@ -73,7 +73,9 @@ drawing.initialCanvasDraw();
  */
 
 /* Displays xy position of mouse, relative to upper-left corner of canvas. */
-canvas.addEventListener('mousemove', updateCanvasMouseCoords);
+canvas.addEventListener('mousemove', () => {
+  updateCanvasMouseCoords(event, drawing.cellSize);
+});
 /* Flips the state of the cell at the position of the mouse click. */
 canvas.addEventListener('mousedown', canvasMouseDownHandler);
 /* While the mouse is held down, any cell under it is set to alive. */
@@ -191,7 +193,7 @@ function canvasMouseDownHandler(event) {
   // Only update the grid if the user clicked within its bounds.
   if (inGridBoundaries(xPos, yPos, drawing.xMax, drawing.yMax)) {
     // Get the row and column of the mouse press.
-    let [i, j] = getCellFromCoords(xPos, yPos, drawing.xMax, drawing.yMax);
+    let [i, j] = getCellFromCoords(xPos, yPos, drawing.cellSize);
 
     // To support clicking, rather than just click-and-hold, we immediately
     // modify the state of the cell at the position of the mouse press, and
@@ -351,7 +353,7 @@ function changeDelayBetweenSteps() {
  */
 function flipCellAtCoords(xPos, yPos) {
   // Get the row and column of the cell.
-  let [i, j] = getCellFromCoords(xPos, yPos, drawing.xMax, drawing.yMax);
+  let [i, j] = getCellFromCoords(xPos, yPos, drawing.cellSize);
   grid.flipCell(i, j);
   drawing.drawCell(i, j, grid.getCellState(i, j)); // Draw the new cell state on canvas.
 }

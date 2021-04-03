@@ -1,5 +1,6 @@
 /* jshint esversion: 6 */
 
+import { getCellFromCoords } from './canvas-helpers.js';
 import { presetPatterns } from './patterns.js';
 
 /* Functions for modifying HTML elements.
@@ -60,12 +61,12 @@ function populateSelectPattern() {
  *
  * This information is displayed in the `debugInfoTable` element.
  */
-export function updateCanvasMouseCoords(event) {
-  // const mouseCell = getCellFromCoords(event.offsetX, event.offsetY);
+export function updateCanvasMouseCoords(event, cellSize) {
+  const mouseCell = getCellFromCoords(event.offsetX, event.offsetY, cellSize);
   document.getElementById('canvasMouseCoords')
     .innerHTML = `${event.offsetX}, ${event.offsetY}`;
-  // document.getElementById('canvasMouseCell')
-  //   .innerHTML = `${mouseCell[0]}, ${mouseCell[1]}`;
+  document.getElementById('canvasMouseCell')
+    .innerHTML = `${mouseCell[0]}, ${mouseCell[1]}`;
 }
 
 /* Updates the stepCountText HTML element to show current step count. */
