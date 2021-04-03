@@ -4,6 +4,12 @@ import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 import { updateStepCountText } from './html-helpers.js';
 
+// TODO: I started adding '@modifies' tags to docs to make it clear which
+// methods modify more than the canvas, but since nearly every function also
+// modifies `this.canvas` or `this.ctx`, those tags are probably misleading
+// if I omit that it modifies those. But if I don't omit those, then
+// Might remove them.
+
 /* This class takes care of drawing the cells on the canvas. */
 export class Drawing {
 
@@ -32,7 +38,10 @@ export class Drawing {
     this.cellMap = cellMap;
   }
 
-  /* Draws the cell at grid[i]][j] on the canvas, colored based on its state. */
+  /* Draws the cell at grid[i]][j] on the canvas, colored based on its state.
+   *
+   * Only modifies canvas.
+   */
   drawCell(i, j, cellState) {
     const x0 = (j * this.cellSize); // x-coordinate of upper-left corner of cell
     const y0 = (i * this.cellSize); // y-coordinate of upper-left corner of cell
@@ -52,6 +61,8 @@ export class Drawing {
 
   /* Draws the grid and step count.
    * Draws every cell, even if its state has not changed.
+   *
+   * Only modifies canvas and HTML.
    */
   drawGrid() {
     updateStepCountText(this.grid.step);
@@ -65,6 +76,8 @@ export class Drawing {
 
   /* Draws the previous grid and step count.
    * Only draws cells whose states have changed from the next step.
+   *
+   * Only modifies canvas and HTML.
    */
   drawPreviousGrid() {
     updateStepCountText(this.grid.step);
@@ -85,6 +98,8 @@ export class Drawing {
 
   /* Draws the next grid and step count.
    * Only draws cells whose states have changed from the previous step.
+   *
+   * Only modifies canvas and HTML.
    */
   drawNextGrid() {
     updateStepCountText(this.grid.step);
@@ -103,7 +118,10 @@ export class Drawing {
     }
   }
 
-  /* Draws the gridlines separating each cell. */
+  /* Draws the gridlines separating each cell.
+   *
+   * Only modifies canvas and HTML.
+   */
   drawGridLines() {
     const width = this.cellSize - 1;
     const height = this.cellSize - 1;
@@ -115,7 +133,10 @@ export class Drawing {
     }
   }
 
-  /* Sets up canvas on page load. */
+  /* Sets up canvas on page load.
+   *
+   * Only modifies canvas and HTML.
+   */
   initialCanvasDraw() {
     // Set gridline color and draw gridlines.
     this.ctx.fillStyle = 'black';
@@ -130,10 +151,9 @@ export class Drawing {
    *
    * If paused: does nothing.
    * If not paused: transitions forward one step, then draws the grid.
+   * ...and in either case, ends by calling itself again with the given delay.
    *
-   * and in either case, ends by calling itself again with the given delay.
-   *
-   * Note: In the case where isPaused === false, this mutates the `grid` object.
+   * @modifies {this.grid}
    */
   loopGrid() {
     // If it's playing, then we move forward 1 step and draw that step.
@@ -154,7 +174,8 @@ export class Drawing {
    * is held down, and sets cells to alive if the mouse button is left-click and
    * dead if the mouse button is right-click.
    *
-   * Note: This mutates the `grid` object.
+   * @modifies {this.grid}
+   * @modifies {this.cellMap}
    */
   holdDraw(event) {
     const xPos = event.offsetX;
@@ -192,6 +213,9 @@ export class Drawing {
    * If it is, we don't touch it.
    * If it isn't, then we set the cell at that ij-coordinate to newCellState,
    * and add that ij-coordinate to the cellMap.
+   *
+   * @modifies {this.grid}
+   * @modifies {this.cellMap}
    */
   holdDrawRepeatHelper(xPos, yPos, newCellState) {
     // Only update the grid if the user clicked within its bounds.
@@ -215,7 +239,12 @@ export class Drawing {
     }
   }
 
-  /* Gets xy position of mouse, and if it's over the grid, modifies cells. */
+  /* Gets xy position of mouse, and if it's over the grid, modifies cells.
+   *
+   * @modifies {this.grid}
+   * @modifies {this.cellMap}
+   * @modifies {this.isMouseDown}
+   */
   canvasMouseDownHandler(event) {
     this.mouseDownButton = event.button;
 
@@ -246,6 +275,8 @@ export class Drawing {
 
   /* Flips state of the cell at the given canvas coordinates.
    * Note: This assumes the given coordinates are valid (ie, on the grid).
+   *
+   * @modifies {this.grid}
    */
   flipCellAtCoords(xPos, yPos) {
     // Get the row and column of the cell.
