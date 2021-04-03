@@ -1,12 +1,15 @@
 /* jshint esversion: 6 */
 
+import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 import { updateStepCountText } from './html-helpers.js';
 
 /* This class takes care of drawing the cells on the canvas. */
 export class Drawing {
 
-  constructor(ctx, grid, cellSize, xMax, yMax) {
+  constructor(canvas, ctx, grid, cellSize, xMax, yMax) {
+    /* The canvas we're drawing on. */
+    this.canvas = canvas;
     /* The canvas context. */
     this.ctx = ctx;
     /* The GameOfLifeGrid class instance we are drawing. */
@@ -25,6 +28,8 @@ export class Drawing {
     this.isMouseDown = false;
     /* When the mouse is down, this is 0 for left-click, 2 for right-click. */
     this.mouseDownButton = undefined;
+    /* Map of visisted cells. */
+    this.cellMap = cellMap;
   }
 
   /* Draws the cell at grid[i]][j] on the canvas, colored based on its state. */
@@ -141,6 +146,99 @@ export class Drawing {
     // it to setTimeout.
     setTimeout(() => {
       requestAnimationFrame(this.loopGrid.bind(this));
-    }, this.delay);
+    }, this.delay
+    );
   }
+
+  /* Tracks which cells the mouse moves over on canvas as long as the mouse button
+   * is held down, and sets cells to alive if the mouse button is left-click and
+   * dead if the mouse button is right-click.
+   *
+   * Note: This mutates the `grid` object.
+   */
+  holdDraw(event) {
+    const xPos = event.offsetX;
+    const yPos = event.offsetY;
+
+    // Determine the new state we set cells to, depending on mouse button.
+    let newCellState;
+    if (this.mouseDownButton === 0) {
+      newCellState = 1; // Click-and-hold left click turns cells alive.
+    } else if (this.mouseDownButton === 2) {
+      newCellState = 0; // Click-and-hold right click turns cells dead.
+    }
+
+    // Initialize variables for the time delay between each repeat() call.
+    let holdDelay = 50;  // Initial hold delay (in milliseconds).
+
+    let timeoutID; // ID of the timer that will be set by setTimeout in repeat().
+
+    // TODO: Docs. Explain why `this` works due to binding repeat() later.
+    function repeat() {
+      this.holdDrawRepeatHelper(xPos, yPos, newCellState);
+      timeoutID = setTimeout(repeat.bind(this), holdDelay);
+    }
+
+    /* Clears the repeat() function that was queued by setTimeout. */
+    this.canvas.addEventListener('mouseup', () => clearTimeout(timeoutID), {once: true});
+    let boundRepeat = repeat.bind(this);
+    boundRepeat(); // Call repeat() for the first time, to begin the loop.
+  }
+
+  /* Helper function for the inner `repeat` function in `holdDraw`.
+   *
+   * If the given xy-coordinate (xPos, yPos) is within the grid boundaries, then
+   * we get the corresponding ij-coordinate, and check if it's in the cellMap.
+   * If it is, we don't touch it.
+   * If it isn't, then we set the cell at that ij-coordinate to newCellState,
+   * and add that ij-coordinate to the cellMap.
+   */
+  holdDrawRepeatHelper(xPos, yPos, newCellState) {
+    // Only update the grid if the user clicked within its bounds.
+    if (inGridBoundaries(xPos, yPos, this.xMax, this.yMax)) {
+
+      let [i, j] = getCellFromCoords(xPos, yPos, this.cellSize); // row and column of cell
+
+      // Only check and modify the cell if we haven't visited it yet.
+      if (this.cellMap.has(i, j) === false) {
+        const cellState = this.grid.getCellState(i, j); // State is either 1 or 0.
+        // We add it to the visited set, then flip and draw the cell.
+        if (cellState !== newCellState) {
+          // If is not in the new state, we set it to the new state.
+          this.grid.setCellState(i, j, newCellState);
+          this.drawCell(i, j, newCellState); // Draw the new cell state on canvas.
+        }
+        // But if the cell is already in the new state, we don't touch it.
+        // We just add it to the visited cells and move on.
+        this.cellMap.set(i, j, newCellState);
+      }
+    }
+  }
+
 }
+
+
+/* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
+ *
+ * This object is used in `holdDraw()`, to store which cells of the grid the
+ * mouse has already "visited" while the mouse button is held down.
+ */
+let cellMap = {
+  cells: new Map(), // Map of string `${i},${j}` to state of cell at coord i,j
+
+  set(i, j, state) { // Record the state of the cell at i,j
+    this.cells.set(`${i},${j}`, state);
+  },
+
+  has(i, j) { // Check if the cell i,j is in the Map
+    return this.cells.has(`${i},${j}`);
+  },
+
+  get(i, j) { // Get the recorded state of the cell i,j
+    return this.cells.get(`${i},${j}`);
+  },
+
+  clear() { // Clear all items from the Map
+    this.cells.clear();
+  },
+};

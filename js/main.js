@@ -1,5 +1,6 @@
 /* jshint esversion: 6 */
 
+import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
 import { presetPatterns } from './patterns.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 
@@ -27,7 +28,7 @@ import { Drawing } from './drawing.js';
 
 // Set up canvas
 const canvas = document.querySelector('.myCanvas');
-const ctx = canvas.getContext('2d'); // specifies canvas is 2d
+const ctx = canvas.getContext('2d'); // TODO: Don't need this here, can define in Drawing class
 
 /* We set the canvas size to be slightly less than the viewport size, since
  * we don't want to user to have to scroll horizontally to see the full grid. */
@@ -51,7 +52,7 @@ const yMax = (rows * cellSize);
 
 /* Create a new Drawing object with everything we just set up.
  * This object handles everything we do with the canvas. */
-let drawing = new Drawing(ctx, grid, cellSize, xMax, yMax);
+let drawing = new Drawing(canvas, ctx, grid, cellSize, xMax, yMax);
 
 /* Initalize HTML elements, then draw gridlines and initial cell states. */
 initializeHTMLElements(drawing);
@@ -81,19 +82,19 @@ canvas.addEventListener('mousedown', canvasMouseDownHandler);
 /* While the mouse is held down, any cell under it is set to alive. */
 canvas.addEventListener('mousemove', (event) => {
   if (drawing.isMouseDown) {
-    holdDraw(event);
+    drawing.holdDraw(event);
   }
 });
 /* Sets isMouseDown to false, which stops click-and-hold drawing of cells. */
 canvas.addEventListener('mouseup', () => {
   drawing.isMouseDown = false;
-  cellMap.clear(); // We empty the map of visited cells when mouse is lifted.
+  drawing.cellMap.clear(); // We empty the map of visited cells when mouse is lifted.
 });
 /* Sets isMouseDown to false if the mouse moves out of the canvas, regardless of
    whether the mouse is still held down. */
 canvas.addEventListener('mouseout', () => {
   drawing.isMouseDown = false;
-  cellMap.clear();
+  drawing.cellMap.clear();
 });
 /* Prevent right-click on canvas from opening the context menu. */
 canvas.addEventListener('contextmenu', function(event) {
@@ -185,13 +186,19 @@ function canvasMouseDownHandler(event) {
   // Store which mouse button was pressed, for use in holdDraw()
   drawing.mouseDownButton = event.button;
 
+  // TODO: Remove these when done
+  // console.log('main.js: canvasMouseDownHandler called');
+  // console.log('main.js: drawing.isMouseDown should be false: ${drawing.isMouseDown}');
+
   // xy-coordinate of mouse press, relative to canvas origin.
   const xPos = event.offsetX;
   const yPos = event.offsetY;
 
   // Only update the grid if the user clicked within its bounds.
-  if (inGridBoundaries(xPos, yPos)) {
-    let [i, j] = getCellFromCoords(xPos, yPos); // row and col of mouse press
+  if (inGridBoundaries(xPos, yPos, drawing.xMax, drawing.yMax)) {
+    // console.log('main.js: is in grid boundaries'); // TODO: Remove these when done
+    // Get the row and column of the mouse press.
+    let [i, j] = getCellFromCoords(xPos, yPos, drawing.xMax, drawing.yMax);
 
     // To support clicking, rather than just click-and-hold, we immediately
     // modify the state of the cell at the position of the mouse press, and
@@ -204,8 +211,9 @@ function canvasMouseDownHandler(event) {
       grid.setCellState(i, j, 0);
       drawing.drawCell(i, j, 0);
     }
-    cellMap.set(i, j, grid.getCellState(i, j));
+    drawing.cellMap.set(i, j, grid.getCellState(i, j));
     drawing.isMouseDown = true;
+    // console.log('main.js: drawing.isMouseDown should be true: ${drawing.isMouseDown}'); // TODO: Remove these when done
   }
 }
 
@@ -375,112 +383,10 @@ function changeDelayBetweenSteps() {
  * Note: This assumes the given coordinates are valid (ie, on the grid).
  */
 function flipCellAtCoords(xPos, yPos) {
-  let [i, j] = getCellFromCoords(xPos, yPos); // Row and column of cell
+  // Get the row and column of the cell.
+  let [i, j] = getCellFromCoords(xPos, yPos, drawing.xMax, drawing.yMax);
   grid.flipCell(i, j);
   drawing.drawCell(i, j, grid.getCellState(i, j)); // Draw the new cell state on canvas.
-}
-
-/* Gets the row and column of the cell on the canvas at the xy coordinate. */
-function getCellFromCoords(xPos, yPos) {
-  return [
-    Math.floor(yPos / drawing.cellSize), // Row index
-    Math.floor(xPos / drawing.cellSize), // Column index
-  ];
-}
-
-/* Checks whether the given xy coordinate in the canvas is within the grid. */
-function inGridBoundaries(xPos, yPos) {
-  return (
-    (0 <= xPos && xPos <= drawing.xMax) &&
-    (0 <= yPos && yPos <= drawing.yMax)
-  );
-}
-
-
-/* Drawing logic
- *
- * `holdDraw` mutates `grid`.
- *
- * TODO: I want to also put these in the `Drawing` class eventually.
- */
-
-
-/* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
- *
- * This object is used in `holdDraw()`, to store which cells of the grid the
- * mouse has already "visited" while the mouse button is held down.
- */
-let cellMap = {
-  cells: new Map(), // Map of string `${i},${j}` to state of cell at coord i,j
-
-  set(i, j, state) { // Record the state of the cell at i,j
-    this.cells.set(`${i},${j}`, state);
-  },
-
-  has(i, j) { // Check if the cell i,j is in the Map
-    return this.cells.has(`${i},${j}`);
-  },
-
-  get(i, j) { // Get the recorded state of the cell i,j
-    return this.cells.get(`${i},${j}`);
-  },
-
-  clear() { // Clear all items from the Map
-    this.cells.clear();
-  },
-};
-
-/* Tracks which cells the mouse moves over on canvas as long as the mouse button
- * is held down, and sets cells to alive if the mouse button is left-click and
- * dead if the mouse button is right-click.
- *
- * Note: This mutates the `grid` object.
- */
-function holdDraw(event) {
-
-  const xPos = event.offsetX;
-  const yPos = event.offsetY;
-
-  // Determine the new state we set cells to, depending on mouse button.
-  let newCellState;
-  if (drawing.mouseDownButton === 0) {
-    newCellState = 1; // Click-and-hold left click turns cells alive.
-  } else if (drawing.mouseDownButton === 2) {
-    newCellState = 0; // Click-and-hold right click turns cells dead.
-  }
-
-  // Initialize variables for the time delay between each repeat() call.
-  let holdDelay = 50;  // Initial hold delay (in milliseconds).
-
-  let timeoutID; // ID of the timer that will be set by setTimeout in repeat().
-
-  function repeat() {
-    // Only update the grid if the user clicked within its bounds.
-    if (inGridBoundaries(xPos, yPos)) {
-
-      let [i, j] = getCellFromCoords(xPos, yPos); // row and column of cell
-
-      // Only check and modify the cell if we haven't visited it yet.
-      if (cellMap.has(i, j) === false) {
-        const cellState = grid.getCellState(i, j); // State is either 1 or 0.
-        // We add it to the visited set, then flip and draw the cell.
-        if (cellState !== newCellState) {
-          // If is not in the new state, we set it to the new state.
-          grid.setCellState(i, j, newCellState);
-          drawing.drawCell(i, j, newCellState); // Draw the new cell state on canvas.
-        }
-        // But if the cell is already in the new state, we don't touch it.
-        // We just add it to the visited cells and move on.
-        cellMap.set(i, j, newCellState);
-      }
-    }
-    // Set a delayed call to repeat(), with the current holdDelay.
-    timeoutID = setTimeout(repeat, holdDelay);
-  }
-
-  /* Clears the repeat() function that was queued by setTimeout. */
-  canvas.addEventListener('mouseup', () => clearTimeout(timeoutID), {once: true});
-  repeat(); // Call repeat() for the first time, to begin the loop.
 }
 
 drawing.loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
