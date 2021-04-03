@@ -215,6 +215,45 @@ export class Drawing {
     }
   }
 
+  /* Gets xy position of mouse, and if it's over the grid, modifies cells. */
+  canvasMouseDownHandler(event) {
+    this.mouseDownButton = event.button;
+
+    // xy-coordinate of mouse press, relative to canvas origin.
+    const xPos = event.offsetX;
+    const yPos = event.offsetY;
+
+    // Only update the grid if the user clicked within its bounds.
+    if (inGridBoundaries(xPos, yPos, this.xMax, this.yMax)) {
+      // Get the row and column of the mouse press.
+      let [i, j] = getCellFromCoords(xPos, yPos, this.cellSize);
+
+      // To support clicking, rather than just click-and-hold, we immediately
+      // modify the state of the cell at the position of the mouse press, and
+      // then add it to cellMap so holdDraw() knows we've already visited it.
+      if (this.mouseDownButton === 0) {
+        // If left-click, flip state of cell at mouse.
+        this.flipCellAtCoords(xPos, yPos);
+      } else if (this.mouseDownButton === 2) {
+        // If right-click, set cell at mouse to dead.
+        this.grid.setCellState(i, j, 0);
+        this.drawCell(i, j, 0);
+      }
+      this.cellMap.set(i, j, this.grid.getCellState(i, j));
+      this.isMouseDown = true;
+    }
+  }
+
+  /* Flips state of the cell at the given canvas coordinates.
+   * Note: This assumes the given coordinates are valid (ie, on the grid).
+   */
+  flipCellAtCoords(xPos, yPos) {
+    // Get the row and column of the cell.
+    let [i, j] = getCellFromCoords(xPos, yPos, this.cellSize);
+    this.grid.flipCell(i, j);
+    this.drawCell(i, j, this.grid.getCellState(i, j)); // Draw the new cell state on canvas.
+  }
+
 }
 
 

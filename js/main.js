@@ -76,11 +76,13 @@ drawing.initialCanvasDraw();
  *
  * The xy-coordinate is relative to the upper-left of the canavas.
  * The ij-coordinate is the row and column of the grid. */
-canvas.addEventListener('mousemove', () => {
+canvas.addEventListener('mousemove', (event) => {
   updateCanvasMouseCoords(event, drawing.cellSize);
 });
 /* Flips the state of the cell at the position of the mouse click. */
-canvas.addEventListener('mousedown', canvasMouseDownHandler);
+canvas.addEventListener('mousedown', (event) => {
+  drawing.canvasMouseDownHandler(event);
+});
 /* While the mouse is held down, any cell under it is set to alive. */
 canvas.addEventListener('mousemove', (event) => {
   if (drawing.isMouseDown) {
@@ -186,35 +188,6 @@ window.addEventListener('mousemove', updateWindowMouseCoords);
  * place in own module.
  */
 
-/* Gets xy position of mouse, and if it's over the grid, modifies cells. */
-function canvasMouseDownHandler(event) {
-  // Store which mouse button was pressed, for use in holdDraw()
-  drawing.mouseDownButton = event.button;
-
-  // xy-coordinate of mouse press, relative to canvas origin.
-  const xPos = event.offsetX;
-  const yPos = event.offsetY;
-
-  // Only update the grid if the user clicked within its bounds.
-  if (inGridBoundaries(xPos, yPos, drawing.xMax, drawing.yMax)) {
-    // Get the row and column of the mouse press.
-    let [i, j] = getCellFromCoords(xPos, yPos, drawing.cellSize);
-
-    // To support clicking, rather than just click-and-hold, we immediately
-    // modify the state of the cell at the position of the mouse press, and
-    // then add it to cellMap so holdDraw() knows we've already visited it.
-    if (drawing.mouseDownButton === 0) {
-      // If left-click, flip state of cell at mouse.
-      flipCellAtCoords(xPos, yPos);
-    } else if (drawing.mouseDownButton === 2) {
-      // If right-click, set cell at mouse to dead.
-      grid.setCellState(i, j, 0);
-      drawing.drawCell(i, j, 0);
-    }
-    drawing.cellMap.set(i, j, grid.getCellState(i, j));
-    drawing.isMouseDown = true;
-  }
-}
 
 /* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
 function changePatternFromDropdown() {
@@ -341,16 +314,6 @@ function stepInputHandler() {
 function changeDelayBetweenSteps() {
   drawing.delay = stepDelaySlider.value;
   updateStepDelaySliderText(drawing.delay);
-}
-
-/* Flips state of the cell at the given canvas coordinates.
- * Note: This assumes the given coordinates are valid (ie, on the grid).
- */
-function flipCellAtCoords(xPos, yPos) {
-  // Get the row and column of the cell.
-  let [i, j] = getCellFromCoords(xPos, yPos, drawing.cellSize);
-  grid.flipCell(i, j);
-  drawing.drawCell(i, j, grid.getCellState(i, j)); // Draw the new cell state on canvas.
 }
 
 drawing.loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
