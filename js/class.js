@@ -6,7 +6,7 @@ import { transitionGrid, transitionTorusGrid } from './transition.js';
 import { createRandomGrid, createZerosGrid } from './grid-patterns.js';
 
 /* Encapsulates various parameters and functions related to grid state. */
-class GameOfLifeGrid {
+export class GameOfLifeGrid {
 
   // TODO: Add parameter to pass cells, then center those.
   /* Creates a randomly-populated GameOfLifeGrid with given rows and columns. */
@@ -181,7 +181,7 @@ class GameOfLifeGrid {
  * From the point of view of our drawing logic, instances of this class can be
  * treated the same as instances of its parent class.
  */
-class PaddedGameOfLifeGrid extends GameOfLifeGrid {
+export class PaddedGameOfLifeGrid extends GameOfLifeGrid {
 
   /*
    * Constructs a GameOfLifeGrid, with the given padding added to the start
@@ -277,7 +277,7 @@ class PaddedGameOfLifeGrid extends GameOfLifeGrid {
 }
 
 /* Game of Life on the surface of a torus. */
-class ToroidalGameOfLifeGrid extends GameOfLifeGrid {
+export class ToroidalGameOfLifeGrid extends GameOfLifeGrid {
 
   // The only class method we override, since the only difference between this
   // and our 2D plane grid is how we determine cell neighbors.
@@ -288,9 +288,3 @@ class ToroidalGameOfLifeGrid extends GameOfLifeGrid {
     this.step += 1;
   }
 }
-
-export {
-  GameOfLifeGrid,
-  PaddedGameOfLifeGrid,
-  ToroidalGameOfLifeGrid,
-};
