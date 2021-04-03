@@ -129,7 +129,7 @@ debugCheckbox.addEventListener('change', function() {
 document.addEventListener('keydown', keydownHandler);
 
 /* Pauses/unpauses grid transition. */
-pauseButton.addEventListener('click', pauseButtonHandler);
+pauseButton.addEventListener('click', () => drawing.togglePause());
 
 /* Moves to previous/next step so long as previous/next step button is held. */
 previousStepButton.addEventListener('mousedown', () => {
@@ -220,16 +220,7 @@ function keydownHandler(event) {
     clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
   } else if (key === 'Space') {
     event.preventDefault();
-    pauseButtonHandler();
-  }
-}
-
-/* Pauses/unpauses drawing depending on whether drawing is currently paused. */
-function pauseButtonHandler() {
-  if (drawing.isPaused) {
-    drawing.unpause();
-  } else {
-    drawing.pause();
+    drawing.togglePause();
   }
 }
 

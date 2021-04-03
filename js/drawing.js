@@ -182,6 +182,15 @@ export class Drawing {
     updatePauseButton(this.isPaused);
   }
 
+  /* If drawing is paused, unpause it. If drawing is unpaused, pause it. */
+  togglePause() {
+    if (this.isPaused) {
+      this.unpause();
+    } else {
+      this.pause();
+    }
+  }
+
   /* Tracks which cells the mouse moves over on canvas as long as the mouse button
    * is held down, and sets cells to alive if the mouse button is left-click and
    * dead if the mouse button is right-click.
