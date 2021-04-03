@@ -68,6 +68,15 @@ export function updateCanvasMouseCoords(event, cellSize) {
     .innerHTML = `${mouseCell[0]}, ${mouseCell[1]}`;
 }
 
+/* Updates the text of pauseButton based on whether isPaused is true. */
+export function updatePauseButton(isPaused) {
+  if (isPaused == true) {
+    document.getElementById('pauseButton').innerHTML = 'Play';
+  } else if (isPaused === false) {
+    document.getElementById('pauseButton').innerHTML = 'Pause';
+  }
+}
+
 /* Updates the stepCountText HTML element to show current step count. */
 export function updateStepCountText(stepCount) {
   document.getElementById('stepCountText').innerHTML = `${stepCount}`;

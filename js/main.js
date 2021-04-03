@@ -188,6 +188,8 @@ const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
 const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
 const boundPreviousStep = grid.previousStep.bind(grid);
 const boundNextStep = grid.nextStep.bind(grid);
+const pause = drawing.pause.bind(drawing);
+const unpause = drawing.unpause.bind(drawing);
 
 /* Changes the delay between steps to the value of the stepDelaySlider. */
 function changeDelayBetweenSteps() {
@@ -223,16 +225,16 @@ function keydownHandler(event) {
 }
 
 /* Pauses drawing. */
-function pause() {
-  drawing.isPaused = true;
-  pauseButton.innerHTML = 'Play';
-}
+// function pause() {
+//   drawing.isPaused = true;
+//   pauseButton.innerHTML = 'Play';
+// }
 
 /* Unpauses drawing. */
-function unpause() {
-  drawing.isPaused = false;
-  pauseButton.innerHTML = 'Pause';
-}
+// function unpause() {
+//   drawing.isPaused = false;
+//   pauseButton.innerHTML = 'Pause';
+// }
 
 /* Pauses/unpauses drawing depending on whether drawing is currently paused. */
 function pauseButtonHandler() {

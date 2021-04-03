@@ -2,7 +2,7 @@
 
 import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
-import { updateStepCountText } from './html-helpers.js';
+import { updatePauseButton, updateStepCountText } from './html-helpers.js';
 
 // TODO: I started adding '@modifies' tags to docs to make it clear which
 // methods modify more than the canvas, but since nearly every function also
@@ -168,6 +168,18 @@ export class Drawing {
       requestAnimationFrame(this.loopGrid.bind(this));
     }, this.delay
     );
+  }
+
+  /* Pauses drawing and updates HTML button text to reflect change. */
+  pause() {
+    this.isPaused = true;
+    updatePauseButton(this.isPaused);
+  }
+
+  /* Unpauses drawing and updates HTML button text to reflect change. */
+  unpause() {
+    this.isPaused = false;
+    updatePauseButton(this.isPaused);
   }
 
   /* Tracks which cells the mouse moves over on canvas as long as the mouse button
