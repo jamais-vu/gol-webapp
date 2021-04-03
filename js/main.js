@@ -246,55 +246,30 @@ function keydownHandler(event) {
   const key = event.code;
   if (key === 'ArrowLeft') {
     event.preventDefault(); // Prevents key from executing its default action.
-    clickAndHold(document, [pause], [previousStep, drawPreviousGridWrapper], 'keyup');
+    clickAndHold(document, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'keyup');
   } else if (key === 'ArrowRight') {
     event.preventDefault();
-    clickAndHold(document, [pause], [nextStep, drawNextGridWrapper], 'keyup');
+    clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
   } else if (key === 'Space') {
     event.preventDefault();
     pauseButtonHandler();
   }
 }
 
-/* Wrapper to pass args to `drawing.drawPreviousGrid()` without binding. */
-function drawPreviousGridWrapper() {
-  drawing.drawPreviousGrid();
-}
-
-/* Wrapper to pass args to `drawing.drawNextGrid()` without binding. */
-function drawNextGridWrapper() {
-  drawing.drawNextGrid();
-}
-
-/* Note on previousStep() and nextStep():
- *
- * `previousStep()` and `nextStep()` are wrapper functions for calling their
- * respective GameOfLifeGrid class methods when passed to `clickAndHold`.
- * We could use binding here, and pass `grid.previousStep.bind(grid)` and
- * `grid.nextStep.bind(grid)` to `clickAndHold` and that would also work.
- *
- * I'm not sure which is best practice, but I think the wrapper functions are
- * faster than binding.
- */
-
-/* Wrapper function to move the grid state back one step. */
-function previousStep() {
-  grid.previousStep();
-}
-
-/* Wrapper function to move the grid state forward one step. */
-function nextStep() {
-  grid.nextStep();
-}
+/* Function bindings to pass drawing and grid methods without losing context. */
+const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
+const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
+const boundPreviousStep = grid.previousStep.bind(grid);
+const boundNextStep = grid.nextStep.bind(grid);
 
 /* Wrapper for calling clickAndHoldButton() with previousStep. */
 function clickAndHoldPreviousStepButton() {
-  clickAndHold(previousStepButton, [pause], [previousStep, drawPreviousGridWrapper], 'mouseup');
+  clickAndHold(previousStepButton, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'mouseup');
 }
 
 /* Wrapper for calling clickAndHoldButton() with nextStep. */
 function clickAndHoldNextStepButton() {
-  clickAndHold(nextStepButton, [pause], [nextStep, drawNextGridWrapper], 'mouseup');
+  clickAndHold(nextStepButton, [pause], [boundNextStep, boundDrawNextGrid], 'mouseup');
 }
 
 /*
