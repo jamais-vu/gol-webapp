@@ -56,7 +56,6 @@ function populateSelectPattern() {
   }
 }
 
-// TODO: ij coords broken since we moved this into its own file.
 /* Shows the xy and ij position of the mouse as it moves on the canvas.
  *
  * This information is displayed in the `debugInfoTable` element.
