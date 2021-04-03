@@ -28,7 +28,6 @@ import { Drawing } from './drawing.js';
 
 // Set up canvas
 const canvas = document.querySelector('.myCanvas');
-const ctx = canvas.getContext('2d'); // TODO: Don't need this here, can define in Drawing class
 
 /* We set the canvas size to be slightly less than the viewport size, since
  * we don't want to user to have to scroll horizontally to see the full grid. */
@@ -52,7 +51,7 @@ const yMax = (rows * cellSize);
 
 /* Create a new Drawing object with everything we just set up.
  * This object handles everything we do with the canvas. */
-let drawing = new Drawing(canvas, ctx, grid, cellSize, xMax, yMax);
+let drawing = new Drawing(canvas, grid, cellSize, xMax, yMax);
 
 /* Initalize HTML elements, then draw gridlines and initial cell states. */
 initializeHTMLElements(drawing);

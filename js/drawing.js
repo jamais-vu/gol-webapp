@@ -7,11 +7,11 @@ import { updateStepCountText } from './html-helpers.js';
 /* This class takes care of drawing the cells on the canvas. */
 export class Drawing {
 
-  constructor(canvas, ctx, grid, cellSize, xMax, yMax) {
+  constructor(canvas, grid, cellSize, xMax, yMax) {
     /* The canvas we're drawing on. */
     this.canvas = canvas;
-    /* The canvas context. */
-    this.ctx = ctx;
+    /* The canvas context. We specify a 2d canvas. */
+    this.ctx = canvas.getContext('2d');
     /* The GameOfLifeGrid class instance we are drawing. */
     this.grid = grid;
     /* The size, in pixels, of the square cells we draw. */
