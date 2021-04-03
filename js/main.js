@@ -58,12 +58,66 @@ drawing.initialCanvasDraw();
 
 /* UI logic
  *
- * First we attach event listeners to various webpage elements.
- * Then we declare the functions those event listeners call.
+ * First we declare functions to handle various browser events.
+ * Then we assign these functions to their respective events.
  *
  * Some functions are declared anonymously in the actual `addEventListener()`
  * call, either for clarity or due to the shortness of the function itself.
  */
+
+/* Event handlers */
+
+/* Function bindings to pass drawing and grid methods without losing context. */
+const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
+const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
+const boundPreviousStep = grid.previousStep.bind(grid);
+const boundNextStep = grid.nextStep.bind(grid);
+const pause = drawing.pause.bind(drawing);
+const unpause = drawing.unpause.bind(drawing);
+
+/* Changes the delay between steps to the value of the stepDelaySlider. */
+function changeDelayBetweenSteps() {
+  drawing.delay = stepDelaySlider.value;
+  updateStepDelaySliderText(drawing.delay);
+}
+
+/* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
+function changePatternFromDropdown() {
+  const patternName = (document.getElementById("selectPattern")).value;
+  grid.changePattern(presetPatterns[patternName].grid);
+  drawing.drawGrid(grid);
+}
+
+/* Handles grid transitions (and drawing new state) based on key presses.
+ *
+ * If the key pressed was the left or right arrow, repeatedly calls previous or
+ * next step, respectively, for as long as the key is down.
+ * If the key pressed was the space button, either pauses or unpauses the grid.
+ */
+function keydownHandler(event) {
+  const key = event.code;
+  if (key === 'ArrowLeft') {
+    event.preventDefault(); // Prevents key from executing its default action.
+    clickAndHold(document, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'keyup');
+  } else if (key === 'ArrowRight') {
+    event.preventDefault();
+    clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
+  } else if (key === 'Space') {
+    event.preventDefault();
+    drawing.togglePause();
+  }
+}
+
+/* Transitions the grid to the user-inputted step, and then draws the grid. */
+function stepInputHandler() {
+  const desiredStep = parseInt(stepInput.value); // stepInput is the input box
+  if ( !isNaN(desiredStep) ) {
+    // Empty input box will raise NaN warning, so we check before proceeding.
+    grid.goToStep(desiredStep);
+    drawing.drawGrid();
+    stepInput.value = desiredStep;
+  }
+}
 
 /* Event Listeners
  *
@@ -73,7 +127,6 @@ drawing.initialCanvasDraw();
  */
 
 /* Displays xy and ij coordinates of the mouse as it moves over the canvas.
- *
  * The xy-coordinate is relative to the upper-left of the canavas.
  * The ij-coordinate is the row and column of the grid. */
 canvas.addEventListener('mousemove', (event) => {
@@ -180,59 +233,5 @@ stepInput.addEventListener('keydown', (event) => {
 /* Displays the xy position of the mouse in the window. */
 window.addEventListener('mousemove', updateWindowMouseCoords);
 
-
-/* Event handlers */
-
-/* Function bindings to pass drawing and grid methods without losing context. */
-const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
-const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
-const boundPreviousStep = grid.previousStep.bind(grid);
-const boundNextStep = grid.nextStep.bind(grid);
-const pause = drawing.pause.bind(drawing);
-const unpause = drawing.unpause.bind(drawing);
-
-/* Changes the delay between steps to the value of the stepDelaySlider. */
-function changeDelayBetweenSteps() {
-  drawing.delay = stepDelaySlider.value;
-  updateStepDelaySliderText(drawing.delay);
-}
-
-/* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
-function changePatternFromDropdown() {
-  const patternName = (document.getElementById("selectPattern")).value;
-  grid.changePattern(presetPatterns[patternName].grid);
-  drawing.drawGrid(grid);
-}
-
-/* Handles grid transitions (and drawing new state) based on key presses.
- *
- * If the key pressed was the left or right arrow, repeatedly calls previous or
- * next step, respectively, for as long as the key is down.
- * If the key pressed was the space button, either pauses or unpauses the grid.
- */
-function keydownHandler(event) {
-  const key = event.code;
-  if (key === 'ArrowLeft') {
-    event.preventDefault(); // Prevents key from executing its default action.
-    clickAndHold(document, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'keyup');
-  } else if (key === 'ArrowRight') {
-    event.preventDefault();
-    clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
-  } else if (key === 'Space') {
-    event.preventDefault();
-    drawing.togglePause();
-  }
-}
-
-/* Transitions the grid to the user-inputted step, and then draws the grid. */
-function stepInputHandler() {
-  const desiredStep = parseInt(stepInput.value); // stepInput is the input box
-  if ( !isNaN(desiredStep) ) {
-    // Empty input box will raise NaN warning, so we check before proceeding.
-    grid.goToStep(desiredStep);
-    drawing.drawGrid();
-    stepInput.value = desiredStep;
-  }
-}
 
 drawing.loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
