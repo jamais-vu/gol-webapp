@@ -3,7 +3,7 @@
 // Object containing preset Game of Life grids.
 // Each key is the name of a pattern, and its corresponding value is an object
 // with the period which the pattern repeats, and its grid representation.
-let presetPatterns = {
+export let presetPatterns = {
 
   block: {
     description: '4x4 grid with one block.',
@@ -121,12 +121,8 @@ let presetPatterns = {
 
 };
 
-/* Returns a grid created from an array of strings.
- *
- * This is just a helper function to make creating preset grids more convenient.
- * We don't use it outside of initializing the presetPatterns object.
- */
-function rowsToGrid(rowsArray) {
+/* Returns a grid created from an array of strings. */
+export function rowsToGrid(rowsArray) {
   let grid = [];
   for (let rowAsString of rowsArray) {
     // Split each string into an array of individual characters,
@@ -142,7 +138,7 @@ function rowsToGrid(rowsArray) {
  * The outer array has length equal to given number of rows.
  * Each element of the outer array has length equal to given number of columns.
  */
-function createZerosGrid(rows, columns = rows) {
+export function createZerosGrid(rows, columns = rows) {
   let grid = []; // array of length rows, each element is 0
   for (let i = 0; i < rows; i++) {
     let column = Array(columns).fill(0); //  array of length columns
@@ -152,7 +148,7 @@ function createZerosGrid(rows, columns = rows) {
 }
 
 /* Returns an n x m grid where each cell is randomly 1 or 0. */
-function createRandomGrid(rows, columns = rows) {
+export function createRandomGrid(rows, columns = rows) {
   let grid = [];
 
   for (let i = 0; i < rows; i++) {
@@ -170,11 +166,3 @@ function createRandomGrid(rows, columns = rows) {
 
   return grid;
 }
-
-// Export the presetPatterns object for use in tests and main
-export {
-  presetPatterns,
-  createZerosGrid,
-  createRandomGrid,
-  rowsToGrid,
-};

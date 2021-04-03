@@ -1,8 +1,9 @@
 /* jshint esversion: 6 */
 
-import * as Grid from './grid.js';
-import * as Life from './life.js';
-import * as Patterns from './patterns.js';
+import { centerGrid } from './centerGrid.js';
+import { copyGrid } from './copyGrid.js';
+import { transitionGrid, transitionTorusGrid } from './transition.js';
+import { createRandomGrid, createZerosGrid } from './grid-patterns.js';
 
 /* Encapsulates various parameters and functions related to grid state. */
 class GameOfLifeGrid {
@@ -13,9 +14,9 @@ class GameOfLifeGrid {
     this.rowCount = rowCount;
     this.colCount = colCount;
     /* rowCount x colCount array of cells, randomly set alive/dead. */
-    this.cells = Patterns.createRandomGrid(rowCount, colCount);
+    this.cells = createRandomGrid(rowCount, colCount);
     /* rowCount x colCount array of the "start" state of the cells. */
-    this.startCells = Grid.copyGrid(this.cells);
+    this.startCells = copyGrid(this.cells);
     /* rowCount x colCount array of the "next" state of the cells.
      * Assigned when `this.previousStep()` is called, so that drawing logic only
      * draws the cells whose states have changed. */
@@ -55,7 +56,7 @@ class GameOfLifeGrid {
   /* Moves the grid state forward one step. */
   nextStep() {
     this.history.push(this.cells);
-    this.cells = Life.transitionGrid(this.cells);
+    this.cells = transitionGrid(this.cells);
     this.step += 1;
   }
 
@@ -131,28 +132,28 @@ class GameOfLifeGrid {
 
   /* Sets all cells to zero and clears history and step count. */
   clear() {
-    this.cells = Patterns.createZerosGrid(this.rowCount, this.colCount);
+    this.cells = createZerosGrid(this.rowCount, this.colCount);
     this.history = [];
     this.step = 0;
   }
 
   /* Resets state to start. */
   reset() {
-    this.cells = Grid.copyGrid(this.startCells);
+    this.cells = copyGrid(this.startCells);
     this.history = [];
     this.step = 0;
   }
 
   /* Sets current state as start state. */
   setAsStart() {
-    this.startCells = Grid.copyGrid(this.cells);
+    this.startCells = copyGrid(this.cells);
     this.history = [];
     this.step = 0;
   }
 
   /* Change cells to given pattern. */
   changePattern(patternCells) {
-    this.cells = Grid.centerGrid(patternCells, this.rowCount, this.colCount);
+    this.cells = centerGrid(patternCells, this.rowCount, this.colCount);
     // TODO: Not sure I actually want changing pattern to change startCells
     // this.startCells = patternCells;
     this.history = [];
@@ -161,7 +162,7 @@ class GameOfLifeGrid {
 
   /* Clears state and randomly sets cells alive/dead. */
   randomize() {
-    this.cells = Patterns.createRandomGrid(this.rowCount, this.colCount);
+    this.cells = createRandomGrid(this.rowCount, this.colCount);
     this.history = [];
     this.step = 0;
   }
@@ -253,14 +254,14 @@ class PaddedGameOfLifeGrid extends GameOfLifeGrid {
 
   /* Sets all cells to zero and clears history and step count. */
   clear() {
-    this.cells = Patterns.createZerosGrid(this.trueRowCount, this.trueColCount);
+    this.cells = createZerosGrid(this.trueRowCount, this.trueColCount);
     this.history = [];
     this.step = 0;
   }
 
   /* Change cells to given pattern. */
   changePattern(patternCells) {
-    this.cells = Grid.centerGrid(patternCells, this.trueRowCount, this.trueColCount);
+    this.cells = centerGrid(patternCells, this.trueRowCount, this.trueColCount);
     // TODO: Not sure I actually want changing pattern to change startCells
     // this.startCells = patternCells;
     this.history = [];
@@ -269,7 +270,7 @@ class PaddedGameOfLifeGrid extends GameOfLifeGrid {
 
   /* Clears state and randomly sets cells alive/dead. */
   randomize() {
-    this.cells = Patterns.createRandomGrid(this.trueRowCount, this.trueColCount);
+    this.cells = createRandomGrid(this.trueRowCount, this.trueColCount);
     this.history = [];
     this.step = 0;
   }
@@ -283,7 +284,7 @@ class ToroidalGameOfLifeGrid extends GameOfLifeGrid {
   /* Moves the grid state forward one step. */
   nextStep() {
     this.history.push(this.cells);
-    this.cells = Life.transitionTorusGrid(this.cells); // (*) Only difference
+    this.cells = transitionTorusGrid(this.cells); // (*) Only difference
     this.step += 1;
   }
 }

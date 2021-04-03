@@ -6,8 +6,6 @@
  * Each inner array represents a row in the grid, and the numbers in each inner
  * array represents the state of that cell (e.g., grid[i][j] corresponds to the
  * state of the cell in row i, column j).
- *
- * Grid manipulations such as copying, resizing, etc. are in `grid.js`.
  */
 
 /* Returns the next state of the given grid. Assumes the grid is a torus. */
@@ -107,7 +105,7 @@ function countLiveCells(coords, grid) {
 // these are no longer used, but have been kept for historical interest.
 
 /* Returns the next state of the given grid. */
-function transitionGrid(grid) {
+export function transitionGrid(grid) {
   const rows = grid.length;
   const columns = grid[0].length;
 

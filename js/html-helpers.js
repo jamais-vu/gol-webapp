@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 
-import { getCellFromCoords } from './canvas-helpers.js';
-import { presetPatterns } from './patterns.js';
+import { getCellFromCoords } from './coordinate-helpers.js';
+import { presetPatterns } from './grid-patterns.js';
 
 /* Functions for modifying HTML elements.
  *

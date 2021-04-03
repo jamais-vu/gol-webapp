@@ -1,10 +1,10 @@
 /* jshint esversion: 6 */
 
-import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
+import { getCellFromCoords, inGridBoundaries } from './coordinate-helpers.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 import { clickAndHold } from './clickAndHold.js';
 import { Drawing } from './drawing.js';
-import { presetPatterns } from './patterns.js';
+import { presetPatterns } from './grid-patterns.js';
 
 import {
   initializeHTMLElements,

@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 
-import { getCellFromCoords, inGridBoundaries } from './canvas-helpers.js';
+import { getCellFromCoords, inGridBoundaries } from './coordinate-helpers.js';
+import { cellMap } from './cellMap.js';
 import { ToroidalGameOfLifeGrid } from './class.js';
 import { updatePauseButton, updateStepCountText } from './html-helpers.js';
 
@@ -35,7 +36,7 @@ export class Drawing {
     /* When the mouse is down, this is 0 for left-click, 2 for right-click. */
     this.mouseDownButton = undefined;
     /* Map of visisted cells. */
-    this.cellMap = cellMap;
+    this.cellMap = new cellMap();
   }
 
   /* Draws the cell at grid[i]][j] on the canvas, colored based on its state.
@@ -307,29 +308,3 @@ export class Drawing {
   }
 
 }
-
-
-/* Wrapper object for a map of ij coords (as strings 'i,j') to cell state.
- *
- * This object is used in `holdDraw()`, to store which cells of the grid the
- * mouse has already "visited" while the mouse button is held down.
- */
-let cellMap = {
-  cells: new Map(), // Map of string `${i},${j}` to state of cell at coord i,j
-
-  set(i, j, state) { // Record the state of the cell at i,j
-    this.cells.set(`${i},${j}`, state);
-  },
-
-  has(i, j) { // Check if the cell i,j is in the Map
-    return this.cells.has(`${i},${j}`);
-  },
-
-  get(i, j) { // Get the recorded state of the cell i,j
-    return this.cells.get(`${i},${j}`);
-  },
-
-  clear() { // Clear all items from the Map
-    this.cells.clear();
-  },
-};
