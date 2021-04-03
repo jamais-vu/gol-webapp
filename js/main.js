@@ -224,24 +224,12 @@ function keydownHandler(event) {
   }
 }
 
-/* Pauses drawing. */
-// function pause() {
-//   drawing.isPaused = true;
-//   pauseButton.innerHTML = 'Play';
-// }
-
-/* Unpauses drawing. */
-// function unpause() {
-//   drawing.isPaused = false;
-//   pauseButton.innerHTML = 'Pause';
-// }
-
 /* Pauses/unpauses drawing depending on whether drawing is currently paused. */
 function pauseButtonHandler() {
   if (drawing.isPaused) {
-    unpause();
+    drawing.unpause();
   } else {
-    pause();
+    drawing.pause();
   }
 }
 
