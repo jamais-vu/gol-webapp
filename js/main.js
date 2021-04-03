@@ -130,8 +130,12 @@ document.addEventListener('keydown', keydownHandler);
 pauseButton.addEventListener('click', pauseButtonHandler);
 
 /* Moves to previous/next step so long as previous/next step button is held. */
-previousStepButton.addEventListener('mousedown', clickAndHoldPreviousStepButton);
-nextStepButton.addEventListener('mousedown', clickAndHoldNextStepButton);
+previousStepButton.addEventListener('mousedown', () => {
+  clickAndHold(previousStepButton, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'mouseup');
+});
+nextStepButton.addEventListener('mousedown', () => {
+  clickAndHold(nextStepButton, [pause], [boundNextStep, boundDrawNextGrid], 'mouseup');
+});
 
 /* Replaces the current grid with a randomly-populated grid. */
 randomizeButton.addEventListener('click', () => {
@@ -265,16 +269,6 @@ const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
 const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
 const boundPreviousStep = grid.previousStep.bind(grid);
 const boundNextStep = grid.nextStep.bind(grid);
-
-/* Wrapper for calling clickAndHoldButton() with previousStep. */
-function clickAndHoldPreviousStepButton() {
-  clickAndHold(previousStepButton, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'mouseup');
-}
-
-/* Wrapper for calling clickAndHoldButton() with nextStep. */
-function clickAndHoldNextStepButton() {
-  clickAndHold(nextStepButton, [pause], [boundNextStep, boundDrawNextGrid], 'mouseup');
-}
 
 /*
  * When the button is pressed, calls each function of the array runOnceFunctions
