@@ -14,16 +14,14 @@ import {
 
 import { Drawing } from './drawing.js';
 
-// TODO: Update this module comment as we make changes.
 /* This file contains logic for drawing the grid on canvas, and for handling
  * user interactions via button or mouse press.
  *
  * Structure (in order):
- * 1) Set up the canvas and grid.
- * 2) Initalize variables relevant for drawing and user interaction.
+ * 1) Set up the canvas and create a grid object based on canvas size.
+ * 2) Create a Drawing object for handling all canvas drawing.
  * 3) Add event listeners to buttons and other elements, and declare
  * handlers for those events.
- * 4) Drawing functions.
  */
 
 // Set up canvas
