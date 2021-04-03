@@ -183,11 +183,43 @@ window.addEventListener('mousemove', updateWindowMouseCoords);
 
 /* Event handlers */
 
+/* Function bindings to pass drawing and grid methods without losing context. */
+const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
+const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
+const boundPreviousStep = grid.previousStep.bind(grid);
+const boundNextStep = grid.nextStep.bind(grid);
+
+/* Changes the delay between steps to the value of the stepDelaySlider. */
+function changeDelayBetweenSteps() {
+  drawing.delay = stepDelaySlider.value;
+  updateStepDelaySliderText(drawing.delay);
+}
+
 /* Changes grid to pattern selected in the 'Select Pattern' dropdown menu. */
 function changePatternFromDropdown() {
   const patternName = (document.getElementById("selectPattern")).value;
   grid.changePattern(presetPatterns[patternName].grid);
   drawing.drawGrid(grid);
+}
+
+/* Handles grid transitions (and drawing new state) based on key presses.
+ *
+ * If the key pressed was the left or right arrow, repeatedly calls previous or
+ * next step, respectively, for as long as the key is down.
+ * If the key pressed was the space button, either pauses or unpauses the grid.
+ */
+function keydownHandler(event) {
+  const key = event.code;
+  if (key === 'ArrowLeft') {
+    event.preventDefault(); // Prevents key from executing its default action.
+    clickAndHold(document, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'keyup');
+  } else if (key === 'ArrowRight') {
+    event.preventDefault();
+    clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
+  } else if (key === 'Space') {
+    event.preventDefault();
+    pauseButtonHandler();
+  }
 }
 
 /* Pauses drawing. */
@@ -211,32 +243,6 @@ function pauseButtonHandler() {
   }
 }
 
-/* Handles grid transitions (and drawing new state) based on key presses.
- *
- * If the key pressed was the left or right arrow, repeatedly calls previous or
- * next step, respectively, for as long as the key is down.
- * If the key pressed was the space button, either pauses or unpauses the grid.
- */
-function keydownHandler(event) {
-  const key = event.code;
-  if (key === 'ArrowLeft') {
-    event.preventDefault(); // Prevents key from executing its default action.
-    clickAndHold(document, [pause], [boundPreviousStep, boundDrawPreviousGrid], 'keyup');
-  } else if (key === 'ArrowRight') {
-    event.preventDefault();
-    clickAndHold(document, [pause], [boundNextStep, boundDrawNextGrid], 'keyup');
-  } else if (key === 'Space') {
-    event.preventDefault();
-    pauseButtonHandler();
-  }
-}
-
-/* Function bindings to pass drawing and grid methods without losing context. */
-const boundDrawPreviousGrid = drawing.drawPreviousGrid.bind(drawing);
-const boundDrawNextGrid = drawing.drawNextGrid.bind(drawing);
-const boundPreviousStep = grid.previousStep.bind(grid);
-const boundNextStep = grid.nextStep.bind(grid);
-
 /* Transitions the grid to the user-inputted step, and then draws the grid. */
 function stepInputHandler() {
   const desiredStep = parseInt(stepInput.value); // stepInput is the input box
@@ -246,12 +252,6 @@ function stepInputHandler() {
     drawing.drawGrid();
     stepInput.value = desiredStep;
   }
-}
-
-/* Changes the delay between steps to the value of the stepDelaySlider. */
-function changeDelayBetweenSteps() {
-  drawing.delay = stepDelaySlider.value;
-  updateStepDelaySliderText(drawing.delay);
 }
 
 drawing.loopGrid(); // After declaring everything, we call loopGrid() to run the grid.
