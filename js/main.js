@@ -219,19 +219,19 @@ function changePatternFromDropdown() {
   drawing.drawGrid(grid);
 }
 
-/* "Pauses" drawing, by having loopGrid() do nothing but call itself again. */
+/* Pauses drawing. */
 function pause() {
   drawing.isPaused = true;
   pauseButton.innerHTML = 'Play';
 }
 
-/* "Unpauses" loopGrid(). */
+/* Unpauses drawing. */
 function unpause() {
   drawing.isPaused = false;
   pauseButton.innerHTML = 'Pause';
 }
 
-/* Controls whether the grid automatically steps forward. */
+/* Pauses/unpauses drawing depending on whether drawing is currently paused. */
 function pauseButtonHandler() {
   if (drawing.isPaused) {
     unpause();
