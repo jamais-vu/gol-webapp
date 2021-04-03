@@ -101,7 +101,7 @@ canvas.addEventListener('mouseout', () => {
   drawing.cellMap.clear();
 });
 /* Prevent right-click on canvas from opening the context menu. */
-canvas.addEventListener('contextmenu', function(event) {
+canvas.addEventListener('contextmenu', (event) => {
   event.preventDefault();
 });
 
