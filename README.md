@@ -1,5 +1,7 @@
 User-interactive JavaScript web app of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life).
 
+![](./images/zoomed-out-grid.png "a zoomed-out grid")
+
 Play with the web app at https://gol-webapp.jamaisvu.repl.co/.
 
 ## Instructions
