@@ -222,10 +222,11 @@ stepDelaySlider.addEventListener('input', changeDelayBetweenSteps);
 /* Transitions the grid forward/backward to user-inputted step. */
 stepInputSubmit.addEventListener('click', stepInputHandler);
 stepInputSubmit.addEventListener('click', pause);
-/* Disable pressing "Enter" key on step input, since that causes page reload. */
+/* Pressing "Enter" goes to inputted step without reloading page. */
 stepInput.addEventListener('keydown', (event) => {
   if (event.code === 'Enter') {
-    event.preventDefault();
+    event.preventDefault(); // Disable button submit, which would reload page,
+    stepInputHandler();     // and call stepInputHandler to move to that step.
   }
 });
 
